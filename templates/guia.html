@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JahirLandia — Guía de pasos</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<nav>
+  <span class="brand">🏢 JahirLandia</span>
+  <ul class="steps-nav">
+    <li><a href="/">Inicio</a></li>
+    <li><a href="/guia-page">Guía</a></li>
+    <li><a href="/parametros-page">Parámetros</a></li>
+    <li><a href="/evaluacion-page">Evaluación</a></li>
+    <li><a href="/registro-page">Registro</a></li>
+  </ul>
+</nav>
+
+<div class="container">
+  <div class="card">
+    <h1>Guía paso a paso</h1>
+    <p>Estos son todos los trámites que necesitas completar para constituir tu empresa en Baja California.</p>
+
+    <div id="progress-label" style="font-size:.85rem;color:#6b7280;">Cargando progreso…</div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+    </div>
+
+    <ul class="step-list" id="step-list">
+      <li style="color:#9ca3af;padding:1rem 0;">Cargando pasos…</li>
+    </ul>
+
+    <div style="margin-top:1.5rem;display:flex;gap:1rem;">
+      <a href="/parametros-page" class="btn btn-primary">Ir a Parámetros →</a>
+    </div>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+<script>
+  const empresaId = getEmpresaId();
+
+  async function cargarPasos() {
+    const [pasos, progreso] = await Promise.all([
+      apiFetch("/pasos"),
+      empresaId ? apiFetch(`/empresa/${empresaId}/progreso`) : Promise.resolve({ pasos_completados: [], porcentaje: 0 }),
+    ]);
+
+    const completados = new Set(progreso.pasos_completados);
+    const pct = progreso.porcentaje;
+
+    document.getElementById("progress-fill").style.width = pct + "%";
+    document.getElementById("progress-label").textContent =
+      `Progreso: ${progreso.pasos_completados.length} de ${pasos.length} pasos completados (${pct}%)`;
+
+    const lista = document.getElementById("step-list");
+    lista.innerHTML = pasos.map(paso => `
+      <li class="step-item ${completados.has(paso.paso_id) ? 'done' : ''}" id="paso-${paso.paso_id}">
+        <div class="step-num">${completados.has(paso.paso_id) ? '✓' : paso.paso_id}</div>
+        <div class="step-body">
+          <strong>${paso.titulo}</strong>
+          <p>${paso.descripcion}</p>
+          ${paso.documentos_requeridos.length ? `<p style="margin-top:.3rem;font-size:.8rem;color:#4b5563;">📄 ${paso.documentos_requeridos.join(', ')}</p>` : ''}
+          ${empresaId && !completados.has(paso.paso_id)
+            ? `<button class="btn btn-outline" style="margin-top:.6rem;font-size:.8rem;padding:.3rem .9rem;" onclick="completar(${paso.paso_id})">Marcar como completado</button>`
+            : ''}
+        </div>
+      </li>
+    `).join('');
+  }
+
+  async function completar(pasoId) {
+    if (!empresaId) return alert("Primero crea tu empresa en la página de inicio.");
+    await apiFetch(`/empresa/${empresaId}/pasos/${pasoId}/completar`, { method: "POST" });
+    cargarPasos();
+  }
+
+  cargarPasos();
+</script>
+</body>
+</html>

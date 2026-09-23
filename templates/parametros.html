@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JahirLandia — Parámetros</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<nav>
+  <span class="brand">🏢 JahirLandia</span>
+  <ul class="steps-nav">
+    <li><a href="/">Inicio</a></li>
+    <li><a href="/guia-page">Guía</a></li>
+    <li><a href="/parametros-page">Parámetros</a></li>
+    <li><a href="/evaluacion-page">Evaluación</a></li>
+    <li><a href="/registro-page">Registro</a></li>
+  </ul>
+</nav>
+
+<div class="container">
+  <div class="card">
+    <h1>Parámetros de tu empresa</h1>
+    <p>Completa los 7 parámetros. Con ellos, Bob evaluará la viabilidad de tu empresa en el contexto de Baja California.</p>
+
+    <div id="alert" class="alert"></div>
+
+    <div class="form-group">
+      <label for="capital">Capital inicial (MXN)</label>
+      <input type="number" id="capital" placeholder="Ej. 50000" min="0" />
+      <small>Monto en pesos mexicanos que aportarás al iniciar.</small>
+    </div>
+
+    <div class="form-group">
+      <label for="giro">Giro / Sector</label>
+      <select id="giro">
+        <option value="">— Selecciona —</option>
+        <option value="comercio">Comercio</option>
+        <option value="manufactura">Manufactura</option>
+        <option value="servicios">Servicios</option>
+        <option value="tecnologia">Tecnología</option>
+        <option value="turismo">Turismo</option>
+        <option value="agroindustria">Agroindustria</option>
+        <option value="construccion">Construcción</option>
+        <option value="salud">Salud</option>
+        <option value="educacion">Educación</option>
+        <option value="otro">Otro</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label for="empleados">Número de empleados</label>
+      <input type="number" id="empleados" placeholder="Ej. 3" min="0" />
+    </div>
+
+    <div class="form-group">
+      <label for="plan-ventas">Plan de ventas</label>
+      <textarea id="plan-ventas" placeholder="Describe tu estrategia de ventas: ¿a quién le vendes, cómo y cuánto esperas vender?"></textarea>
+      <small>Mínimo 50 caracteres. Más detalle = mayor puntaje.</small>
+    </div>
+
+    <div class="form-group">
+      <label for="plan-financiero">Plan financiero</label>
+      <textarea id="plan-financiero" placeholder="Describe tus proyecciones de ingresos, gastos y punto de equilibrio."></textarea>
+      <small>Mínimo 50 caracteres.</small>
+    </div>
+
+    <div class="form-group">
+      <label for="analisis">Análisis de mercado</label>
+      <textarea id="analisis" placeholder="¿Quiénes son tus competidores? ¿Cuál es tu mercado objetivo en Baja California?"></textarea>
+      <small>Mínimo 50 caracteres.</small>
+    </div>
+
+    <div class="form-group">
+      <label>
+        <input type="checkbox" id="registro-legal" style="margin-right:.5rem;" />
+        Ya tengo o estoy tramitando mi CURP y RFC
+      </label>
+    </div>
+
+    <button class="btn btn-primary" id="btn-guardar">Guardar y continuar →</button>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+<script>
+  const empresaId = getEmpresaId();
+
+  /* Pre-cargar si ya existen parámetros guardados */
+  async function precargar() {
+    if (!empresaId) return;
+    try {
+      const p = await apiFetch(`/empresa/${empresaId}/parametros`);
+      document.getElementById("capital").value       = p.capital_inicial ?? "";
+      document.getElementById("giro").value          = p.giro_sector ?? "";
+      document.getElementById("empleados").value     = p.num_empleados ?? "";
+      document.getElementById("plan-ventas").value   = p.plan_ventas ?? "";
+      document.getElementById("plan-financiero").value = p.plan_financiero ?? "";
+      document.getElementById("analisis").value      = p.analisis_mercado ?? "";
+      document.getElementById("registro-legal").checked = p.registro_legal ?? false;
+    } catch (_) { /* no hay parámetros aún, está bien */ }
+  }
+
+  document.getElementById("btn-guardar").addEventListener("click", async () => {
+    const alertEl = document.getElementById("alert");
+    hideAlert(alertEl);
+
+    if (!empresaId) {
+      showAlert(alertEl, "Primero crea tu empresa en la página de inicio.");
+      return;
+    }
+
+    const datos = {
+      capital_inicial:  parseFloat(document.getElementById("capital").value),
+      giro_sector:      document.getElementById("giro").value,
+      num_empleados:    parseInt(document.getElementById("empleados").value, 10),
+      plan_ventas:      document.getElementById("plan-ventas").value,
+      plan_financiero:  document.getElementById("plan-financiero").value,
+      analisis_mercado: document.getElementById("analisis").value,
+      registro_legal:   document.getElementById("registro-legal").checked,
+    };
+
+    try {
+      await apiFetch(`/empresa/${empresaId}/parametros`, {
+        method: "POST",
+        body: JSON.stringify(datos),
+      });
+      showAlert(alertEl, "Parámetros guardados correctamente.", "success");
+      setTimeout(() => window.location.href = "/evaluacion-page", 800);
+    } catch (e) {
+      showAlert(alertEl, e.message);
+    }
+  });
+
+  precargar();
+</script>
+</body>
+</html>

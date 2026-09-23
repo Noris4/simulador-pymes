@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JahirLandia — Crea tu empresa</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<nav>
+  <span class="brand">🏢 JahirLandia</span>
+  <ul class="steps-nav">
+    <li><a href="/">Inicio</a></li>
+    <li><a href="/guia-page">Guía</a></li>
+    <li><a href="/parametros-page">Parámetros</a></li>
+    <li><a href="/evaluacion-page">Evaluación</a></li>
+    <li><a href="/registro-page">Registro</a></li>
+  </ul>
+</nav>
+
+<div class="container">
+  <div class="card">
+    <h1>Crea tu empresa desde cero</h1>
+    <p>JahirLandia te lleva paso a paso por todo el proceso de constitución legal de tu empresa en <strong>Baja California</strong>. Sin conocimientos legales previos.</p>
+
+    <div id="alert" class="alert"></div>
+
+    <div class="form-group">
+      <label for="nombre">Nombre de la empresa</label>
+      <input type="text" id="nombre" placeholder="Ej. Tacos El Borrego S.A." />
+    </div>
+    <div class="form-group">
+      <label for="giro">Giro / Sector</label>
+      <select id="giro">
+        <option value="">— Selecciona —</option>
+        <option value="comercio">Comercio</option>
+        <option value="manufactura">Manufactura</option>
+        <option value="servicios">Servicios</option>
+        <option value="tecnologia">Tecnología</option>
+        <option value="turismo">Turismo</option>
+        <option value="agroindustria">Agroindustria</option>
+        <option value="construccion">Construcción</option>
+        <option value="salud">Salud</option>
+        <option value="educacion">Educación</option>
+        <option value="otro">Otro</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="fundador">Nombre del fundador</label>
+      <input type="text" id="fundador" placeholder="Tu nombre completo" />
+    </div>
+    <div class="form-group">
+      <label for="curp_rfc">CURP o RFC <span style="font-weight:400;color:#6b7280">(opcional)</span></label>
+      <input type="text" id="curp_rfc" placeholder="XXXX000000XXXXXX00" />
+    </div>
+
+    <button class="btn btn-primary" id="btn-crear">Comenzar →</button>
+  </div>
+</div>
+
+<script src="/static/app.js"></script>
+<script>
+  document.getElementById("btn-crear").addEventListener("click", async () => {
+    const alert = document.getElementById("alert");
+    hideAlert(alert);
+
+    const nombre   = document.getElementById("nombre").value.trim();
+    const giro     = document.getElementById("giro").value;
+    const fundador = document.getElementById("fundador").value.trim();
+    const curp_rfc = document.getElementById("curp_rfc").value.trim();
+
+    if (!nombre || !giro || !fundador) {
+      showAlert(alert, "Por favor completa nombre, giro y fundador.");
+      return;
+    }
+
+    try {
+      const empresa = await apiFetch("/empresa", {
+        method: "POST",
+        body: JSON.stringify({ nombre, giro, fundador, curp_rfc }),
+      });
+      setEmpresaId(empresa.empresa_id);
+      window.location.href = "/guia-page";
+    } catch (e) {
+      showAlert(alert, e.message);
+    }
+  });
+</script>
+</body>
+</html>
