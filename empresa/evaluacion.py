@@ -4,7 +4,7 @@ Motor de evaluación de viabilidad empresarial.
 
 Califica la empresa en base a 7 parámetros con pesos configurables.
 Cuando la empresa no aprueba, construye un prompt con los resultados
-y lo envía a Bob para que genere feedback en lenguaje natural.
+y lo envía a un LLM en IBM watsonx para que genere feedback en lenguaje natural.
 
 NOTA: Los pesos y la calificación mínima están marcados con TODO —
 serán actualizados con los valores definitivos del documento de investigación
@@ -110,7 +110,7 @@ def evaluar_empresa(empresa_id: str) -> dict:
       - calificacion (float 0–100)
       - aprobado (bool)
       - detalle_puntajes (dict por parámetro)
-      - feedback (str generado por Bob si no aprueba, vacío si aprueba)
+      - feedback (str generado por el LLM si no aprueba, vacío si aprueba)
       - fecha (str ISO)
     """
     if not mod_parametros.parametros_completos(empresa_id):
@@ -159,9 +159,9 @@ def evaluar_empresa(empresa_id: str) -> dict:
 def generar_feedback(empresa_id: str, detalle: dict, calificacion: float) -> str:
     """
     Construye un prompt con los resultados numéricos de la evaluación
-    y lo envía a Bob para que genere recomendaciones en lenguaje natural.
+    y lo envía al LLM en IBM watsonx para que genere recomendaciones en lenguaje natural.
 
-    Si la API de Bob no está disponible, retorna un mensaje de texto plano
+    Si la API no está disponible, retorna un mensaje de texto plano
     con las áreas de oportunidad identificadas.
     """
     # Identificar parámetros que no alcanzaron el puntaje máximo
@@ -182,45 +182,71 @@ def generar_feedback(empresa_id: str, detalle: dict, calificacion: float) -> str
         f"la evaluación en su siguiente intento."
     )
 
-    return _llamar_bob(prompt)
+    return _llamar_llm(prompt)
 
 
-def _llamar_bob(prompt: str) -> str:
+# ── Configuración IBM watsonx ────────────────────────────────────────────────
+
+_WATSONX_PROJECT_ID = "f18f499c-162e-4ba2-a176-1c7e09ef931e"
+_WATSONX_MODEL      = "meta-llama/llama-3-3-70b-instruct"
+_WATSONX_BASE_URL   = "https://au-syd.ml.cloud.ibm.com"
+_WATSONX_API_KEY    = "fBfkTFHrHNzCUaONT2kxTeZWQZN80R_8uuMmQdDLvhXX"
+
+
+def _obtener_token_iam() -> str:
+    """Obtiene un token de acceso IAM usando la API key de watsonx."""
+    import urllib.request
+    import json
+
+    payload = (
+        "grant_type=urn%3Aibm%3Aparams%3Aoauth%3Agrant-type%3Aapikey"
+        f"&apikey={_WATSONX_API_KEY}"
+    ).encode("utf-8")
+    req = urllib.request.Request(
+        "https://iam.cloud.ibm.com/identity/token",
+        data=payload,
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+        method="POST",
+    )
+    with urllib.request.urlopen(req, timeout=15) as resp:
+        data = json.loads(resp.read().decode("utf-8"))
+        return data["access_token"]
+
+
+def _llamar_llm(prompt: str) -> str:
     """
-    Envía el prompt a Bob y retorna la respuesta en texto.
-    Usa la variable de entorno BOBSHELL_API_KEY para autenticación
-    (la misma clave que usa Bob Shell — tipo Inference recomendado).
-    Si la clave no está configurada, retorna el prompt como texto plano
-    para que el equipo pueda verificar el contenido antes de integrar la API.
+    Envía el prompt al LLM en IBM watsonx y retorna la respuesta en texto.
+    Modelo: meta-llama/llama-3-3-70b-instruct
     """
-    api_key = os.environ.get("BOBSHELL_API_KEY")
-
-    if not api_key:
-        # Modo sin API: retorna el prompt para revisión/desarrollo
-        return (
-            "[Bob no está configurado — establece BOBSHELL_API_KEY como variable de entorno]\n\n"
-            + prompt
-        )
+    import urllib.request
+    import json
 
     try:
-        import urllib.request
-        import json
-
-        payload = json.dumps({"prompt": prompt}).encode("utf-8")
+        token = _obtener_token_iam()
+        url = f"{_WATSONX_BASE_URL}/ml/v1/text/generation?version=2023-05-29"
+        payload = json.dumps({
+            "model_id": _WATSONX_MODEL,
+            "project_id": _WATSONX_PROJECT_ID,
+            "input": prompt,
+            "parameters": {
+                "max_new_tokens": 800,
+                "temperature": 0.7,
+            },
+        }).encode("utf-8")
         req = urllib.request.Request(
-            "https://api.ibm.com/bob/v1/chat",
+            url,
             data=payload,
             headers={
                 "Content-Type": "application/json",
-                "Authorization": f"Bearer {api_key}",
+                "Authorization": f"Bearer {token}",
             },
             method="POST",
         )
         with urllib.request.urlopen(req, timeout=30) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-            return data.get("response", "Sin respuesta de Bob.")
+            return data["results"][0]["generated_text"].strip()
     except Exception as exc:
-        return f"[Error al contactar a Bob: {exc}]\n\n{prompt}"
+        return f"[Error al contactar al LLM: {exc}]\n\n{prompt}"
 
 
 # ── Historial ────────────────────────────────────────────────────────────────

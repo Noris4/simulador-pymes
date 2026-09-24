@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv(encoding="utf-8-sig")
+
 from flask import Flask, jsonify, request, render_template
 from empresa import perfil, guia, parametros, evaluacion, registro
 
