@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Lazuli-KPI — Tramitología</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+<nav>
+  <span class="brand">💎 Lazuli-KPI</span>
+  <ul class="steps-nav">
+    <li><a href="/">① Inicio</a></li>
+    <li><a href="/parametros-page">② Parámetros</a></li>
+    <li><a href="/evaluacion-page">③ Evaluación</a></li>
+    <li><a href="/tramitologia-page" class="active">④ Tramitología</a></li>
+    <li><a href="/registro-page">⑤ Conclusión</a></li>
+  </ul>
+</nav>
+
+<div class="container">
+
+  <!-- Barra de progreso del flujo -->
+  <div style="margin-bottom:1.5rem;">
+    <div style="display:flex;justify-content:space-between;font-size:.8rem;color:#6b7280;margin-bottom:.35rem;">
+      <span>Paso 4 de 5</span>
+      <span>80 %</span>
+    </div>
+    <div class="progress-bar-wrap" style="margin:0;">
+      <div class="progress-bar-fill" style="width:80%"></div>
+    </div>
+  </div>
+
+  <div class="card" id="panel-tramitologia">
+    <div class="step-header">
+      <div class="step-num-big">4</div>
+      <div>
+        <div class="step-title">Tramitología requerida</div>
+        <div class="step-subtitle">Permisos, trámites y costos estimados para operar legalmente en Baja California según el giro de tu negocio.</div>
+      </div>
+    </div>
+
+    <div id="tramit-loading" class="tramit-loading">
+      <div class="tramit-spinner"></div>
+      <span>Consultando trámites para tu giro…</span>
+    </div>
+
+    <div id="tramit-contenido" style="display:none;">
+      <div id="tramit-resumen" class="feedback-resumen" style="margin-bottom:1.25rem;"></div>
+
+      <div id="tramit-tabla-wrap" style="display:none;">
+        <h3 class="feedback-tabla-titulo">Permisos, trámites y costos</h3>
+        <div class="tramit-tabla">
+          <div class="tramit-thead">
+            <div class="tramit-th">Trámite</div>
+            <div class="tramit-th">Institución</div>
+            <div class="tramit-th tramit-th-costo">Costo estimado</div>
+            <div class="tramit-th">Tiempo</div>
+          </div>
+          <div id="tramit-filas"></div>
+        </div>
+      </div>
+
+      <div style="margin-top:1.5rem;display:flex;gap:1rem;">
+        <a href="/evaluacion-page" class="btn btn-outline">← Volver a evaluación</a>
+        <a href="/registro-page" class="btn btn-success">Continuar → Paso 5: Conclusión</a>
+      </div>
+    </div>
+
+    <div id="tramit-error" class="alert alert-error" style="display:none;"></div>
+  </div>
+
+</div>
+
+<script src="/static/app.js"></script>
+<script>
+  const empresaId = getEmpresaId();
+
+  if (!empresaId) window.location.href = "/";
+
+  async function cargarTramitologia() {
+    try {
+      const data = await apiFetch(`/empresa/${empresaId}/tramitologia`);
+      document.getElementById("tramit-loading").style.display = "none";
+      renderTramitologia(data.tramitologia);
+      document.getElementById("tramit-contenido").style.display = "block";
+    } catch (e) {
+      document.getElementById("tramit-loading").style.display = "none";
+      const errEl = document.getElementById("tramit-error");
+      errEl.textContent = "No se pudo cargar la tramitología: " + e.message;
+      errEl.style.display = "block";
+    }
+  }
+
+  function renderTramitologia(texto) {
+    const parteResumen  = texto.indexOf("RESUMEN");
+    const parteTramites = texto.indexOf("TRAMITES");
+
+    // --- Párrafos de resumen ---
+    const resumenEl = document.getElementById("tramit-resumen");
+    resumenEl.innerHTML = "";
+    let textoResumen = texto;
+    if (parteResumen !== -1) {
+      const inicio = parteResumen + "RESUMEN".length;
+      const fin = parteTramites !== -1 ? parteTramites : texto.length;
+      textoResumen = texto.slice(inicio, fin);
+    } else if (parteTramites !== -1) {
+      textoResumen = texto.slice(0, parteTramites);
+    }
+    textoResumen.trim().split(/\n{2,}/).forEach(parrafo => {
+      const p = parrafo.trim();
+      if (p) {
+        const el = document.createElement("p");
+        el.textContent = p;
+        resumenEl.appendChild(el);
+      }
+    });
+
+    // --- Tabla de trámites ---
+    if (parteTramites === -1) return;
+    const textoTabla = texto.slice(parteTramites + "TRAMITES".length).trim();
+    const filas = textoTabla.split("\n").map(l => l.trim()).filter(l => l.includes("|"));
+    if (filas.length === 0) return;
+
+    const filasCont = document.getElementById("tramit-filas");
+    filasCont.innerHTML = "";
+    filas.forEach((fila, i) => {
+      const partes = fila.split("|").map(s => s.trim());
+      const [tramite, institucion, costo, tiempo] = partes;
+      const row = document.createElement("div");
+      row.className = "tramit-row" + (i % 2 === 0 ? "" : " tramit-row-alt");
+      row.innerHTML = `
+        <div class="tramit-td">${tramite || ""}</div>
+        <div class="tramit-td tramit-td-inst">${institucion || ""}</div>
+        <div class="tramit-td tramit-td-costo">${costo || ""}</div>
+        <div class="tramit-td">${tiempo || ""}</div>
+      `;
+      filasCont.appendChild(row);
+    });
+
+    document.getElementById("tramit-tabla-wrap").style.display = "block";
+  }
+
+  cargarTramitologia();
+</script>
+</body>
+</html>

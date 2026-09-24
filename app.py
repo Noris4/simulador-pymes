@@ -2,7 +2,7 @@ from dotenv import load_dotenv
 load_dotenv(encoding="utf-8-sig")
 
 from flask import Flask, jsonify, request, render_template
-from empresa import perfil, guia, parametros, evaluacion, registro
+from empresa import perfil, guia, parametros, evaluacion, registro, tramitologia
 
 app = Flask(__name__)
 
@@ -20,6 +20,10 @@ def parametros_page():
 @app.route("/evaluacion-page")
 def evaluacion_page():
     return render_template("evaluacion.html")
+
+@app.route("/tramitologia-page")
+def tramitologia_page():
+    return render_template("tramitologia.html")
 
 @app.route("/registro-page")
 def registro_page():
@@ -111,6 +115,14 @@ def route_evaluar_empresa(empresa_id):
 @app.route("/empresa/<empresa_id>/evaluaciones", methods=["GET"])
 def route_historial_evaluaciones(empresa_id):
     return jsonify(evaluacion.obtener_historial_evaluaciones(empresa_id))
+
+
+@app.route("/empresa/<empresa_id>/tramitologia", methods=["GET"])
+def route_tramitologia(empresa_id):
+    resultado = tramitologia.generar_tramitologia(empresa_id)
+    if "error" in resultado:
+        return jsonify(resultado), 400
+    return jsonify(resultado)
 
 
 # ── Registro ─────────────────────────────────────────────────────────────────

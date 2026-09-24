@@ -14,11 +14,13 @@
     <li><a href="/" class="active">① Inicio</a></li>
     <li><a href="/parametros-page">② Parámetros</a></li>
     <li><a href="/evaluacion-page">③ Evaluación</a></li>
-    <li><a href="/registro-page">④ Registro</a></li>
+    <li><a href="/tramitologia-page">④ Tramitología</a></li>
+    <li><a href="/registro-page">⑤ Conclusión</a></li>
   </ul>
 </nav>
 
 <div class="container">
+
   <div class="card">
     <div class="step-header">
       <div class="step-num-big">1</div>
@@ -40,48 +42,252 @@
 
     <!-- Giro comercial (tipo de sociedad) -->
     <div class="form-group">
-      <label>Giro comercial <span style="font-weight:400;color:#6b7280">(tipo de sociedad)</span></label>
+      <label>Tipo de sociedad <span style="font-weight:400;color:#6b7280">(opcional)</span></label>
       <input type="hidden" id="giro-comercial" />
-      <div class="giro-grid" id="giro-grid">
-        <div class="giro-card" data-val="S.A. de C.V.">S.A. de C.V.</div>
-        <div class="giro-card" data-val="S. de R.L. de C.V.">S. de R.L. de C.V.</div>
-        <div class="giro-card" data-val="S.A.S.">S.A.S.</div>
-        <div class="giro-card" data-val="S.C.">S.C.</div>
-        <div class="giro-card" data-val="A.C.">A.C.</div>
-        <div class="giro-card" data-val="Persona Física con Act. Empresarial">Persona Física</div>
-      </div>
-      <span class="field-error" id="err-giro"></span>
 
-      <!-- Definiciones desplegables -->
-      <details class="giro-defs">
-        <summary>¿Qué significa cada tipo de sociedad?</summary>
-        <div class="giro-def-list">
-          <div class="giro-def-item">
-            <strong>S.A. de C.V.</strong> — Sociedad Anónima de Capital Variable
-            <p>Ideal para medianas y grandes empresas con varios socios. El capital puede aumentar o disminuir sin modificar el acta constitutiva. Responsabilidad limitada al capital aportado.</p>
-          </div>
-          <div class="giro-def-item">
-            <strong>S. de R.L. de C.V.</strong> — Sociedad de Responsabilidad Limitada de Capital Variable
-            <p>Pensada para grupos pequeños de socios (máx. 50). Combina responsabilidad limitada con flexibilidad de capital variable. Común en empresas familiares o startups.</p>
-          </div>
-          <div class="giro-def-item">
-            <strong>S.A.S.</strong> — Sociedad por Acciones Simplificada
-            <p>Figura moderna y ágil, constituida 100 % en línea sin notario. Perfecta para emprendedores que comienzan solos o en pareja. Ingresos anuales máx. $5 millones de pesos.</p>
-          </div>
-          <div class="giro-def-item">
-            <strong>S.C.</strong> — Sociedad Civil
-            <p>Para profesionistas que prestan servicios en conjunto (médicos, abogados, arquitectos). Los socios responden con sus bienes personales según su participación.</p>
-          </div>
-          <div class="giro-def-item">
-            <strong>A.C.</strong> — Asociación Civil
-            <p>Sin fines de lucro. Los ingresos se destinan al objeto social (cultural, educativo, deportivo). No reparte utilidades entre sus miembros.</p>
-          </div>
-          <div class="giro-def-item">
-            <strong>Persona Física con Actividad Empresarial</strong>
-            <p>Tú eres la empresa. Sin separación legal entre tu patrimonio personal y el del negocio. Opción más sencilla para emprendedores individuales que inician.</p>
-          </div>
+      <!-- Pregunta inicial -->
+      <div id="sociedad-pregunta" class="regimen-pregunta">
+        <span>¿Conoces el tipo de sociedad de tu negocio?</span>
+        <div class="regimen-opciones">
+          <button type="button" class="btn-regimen" id="btn-sociedad-si">Sí, lo conozco</button>
+          <button type="button" class="btn-regimen" id="btn-sociedad-no">No estoy seguro</button>
         </div>
-      </details>
+      </div>
+
+      <!-- Panel: SÍ conoce → grid de selección rápida -->
+      <div id="sociedad-panel-si" style="display:none;">
+        <div class="giro-grid" id="giro-grid">
+          <div class="giro-card" data-val="S.A. de C.V.">S.A. de C.V.</div>
+          <div class="giro-card" data-val="S. de R.L. de C.V.">S. de R.L. de C.V.</div>
+          <div class="giro-card" data-val="S.A.S.">S.A.S.</div>
+          <div class="giro-card" data-val="S.C.">S.C.</div>
+          <div class="giro-card" data-val="A.C.">A.C.</div>
+          <div class="giro-card" data-val="Persona Física con Act. Empresarial">Persona Física</div>
+        </div>
+        <button type="button" class="regimen-link" id="btn-no-se-sociedad">No estoy seguro, ver guía →</button>
+      </div>
+
+      <!-- Panel: NO conoce → guía educativa -->
+      <div id="sociedad-panel-no" style="display:none;">
+        <p style="font-size:.85rem;color:#6b7280;margin-bottom:.75rem;">
+          Selecciona el tipo de sociedad que mejor se ajusta a tu emprendimiento.
+        </p>
+        <div class="regimen-guia">
+
+          <div class="regimen-item" data-val="S.A.S." data-label="S.A.S. — Sociedad por Acciones Simplificada">
+            <div class="regimen-item-header">
+              <strong>S.A.S.</strong> — Sociedad por Acciones Simplificada
+              <span class="regimen-badge regimen-badge-popular">Más común para emprendedores</span>
+            </div>
+            <p>Figura moderna y ágil, constituida 100 % en línea sin notario. Perfecta para emprendedores que comienzan solos o en pareja. Ingresos anuales máx. $5 millones de pesos.</p>
+            <div class="regimen-giros">
+              <span class="regimen-giro-tag">Comercio</span>
+              <span class="regimen-giro-tag">Servicios</span>
+              <span class="regimen-giro-tag">Tecnología</span>
+              <span class="regimen-giro-tag">Turismo</span>
+            </div>
+          </div>
+
+          <div class="regimen-item" data-val="Persona Física con Act. Empresarial" data-label="Persona Física con Actividad Empresarial">
+            <div class="regimen-item-header">
+              <strong>Persona Física con Actividad Empresarial</strong>
+            </div>
+            <p>Tú eres la empresa. Sin separación legal entre tu patrimonio personal y el del negocio. La opción más sencilla para emprendedores individuales que inician.</p>
+            <div class="regimen-giros">
+              <span class="regimen-giro-tag">Comercio</span>
+              <span class="regimen-giro-tag">Servicios</span>
+              <span class="regimen-giro-tag">Plataformas digitales</span>
+            </div>
+          </div>
+
+          <div class="regimen-item" data-val="S. de R.L. de C.V." data-label="S. de R.L. de C.V. — Sociedad de Responsabilidad Limitada">
+            <div class="regimen-item-header">
+              <strong>S. de R.L. de C.V.</strong> — Sociedad de Responsabilidad Limitada de Capital Variable
+            </div>
+            <p>Pensada para grupos pequeños de socios (máx. 50). Combina responsabilidad limitada con flexibilidad de capital variable. Común en empresas familiares o startups con varios socios.</p>
+            <div class="regimen-giros">
+              <span class="regimen-giro-tag">Manufactura</span>
+              <span class="regimen-giro-tag">Agroindustria</span>
+              <span class="regimen-giro-tag">Construcción</span>
+              <span class="regimen-giro-tag">Tecnología</span>
+            </div>
+          </div>
+
+          <div class="regimen-item" data-val="S.A. de C.V." data-label="S.A. de C.V. — Sociedad Anónima de Capital Variable">
+            <div class="regimen-item-header">
+              <strong>S.A. de C.V.</strong> — Sociedad Anónima de Capital Variable
+            </div>
+            <p>Ideal para medianas y grandes empresas con varios socios. El capital puede aumentar o disminuir sin modificar el acta constitutiva. Responsabilidad limitada al capital aportado.</p>
+            <div class="regimen-giros">
+              <span class="regimen-giro-tag">Manufactura</span>
+              <span class="regimen-giro-tag">Salud</span>
+              <span class="regimen-giro-tag">Turismo</span>
+              <span class="regimen-giro-tag">Agroindustria</span>
+            </div>
+          </div>
+
+          <div class="regimen-item" data-val="S.C." data-label="S.C. — Sociedad Civil">
+            <div class="regimen-item-header">
+              <strong>S.C.</strong> — Sociedad Civil
+            </div>
+            <p>Para profesionistas que prestan servicios en conjunto: médicos, abogados, arquitectos. Los socios responden con sus bienes personales según su participación.</p>
+            <div class="regimen-giros">
+              <span class="regimen-giro-tag">Salud</span>
+              <span class="regimen-giro-tag">Educación</span>
+              <span class="regimen-giro-tag">Servicios profesionales</span>
+            </div>
+          </div>
+
+          <div class="regimen-item" data-val="A.C." data-label="A.C. — Asociación Civil">
+            <div class="regimen-item-header">
+              <strong>A.C.</strong> — Asociación Civil
+            </div>
+            <p>Sin fines de lucro. Los ingresos se destinan al objeto social (cultural, educativo, deportivo). No reparte utilidades entre sus miembros.</p>
+            <div class="regimen-giros">
+              <span class="regimen-giro-tag">Educación</span>
+              <span class="regimen-giro-tag">Deporte</span>
+              <span class="regimen-giro-tag">Cultura</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Selección confirmada -->
+      <div id="sociedad-seleccionada" style="display:none;margin-top:.75rem;">
+        <div class="regimen-confirmado">
+          <span id="sociedad-confirmada-label"></span>
+          <button type="button" class="regimen-link" id="btn-cambiar-sociedad">Cambiar</button>
+        </div>
+      </div>
+
+      <span class="field-error" id="err-giro"></span>
+    </div>
+
+    <!-- Régimen fiscal -->
+    <div class="form-group" id="fg-regimen">
+      <label>Régimen fiscal <span style="font-weight:400;color:#6b7280">(opcional)</span></label>
+
+      <!-- Pregunta inicial -->
+      <div id="regimen-pregunta" class="regimen-pregunta">
+        <span>¿Conoces el régimen fiscal de tu negocio?</span>
+        <div class="regimen-opciones">
+          <button type="button" class="btn-regimen" id="btn-regimen-si">Sí, lo conozco</button>
+          <button type="button" class="btn-regimen" id="btn-regimen-no">No estoy seguro</button>
+        </div>
+      </div>
+
+      <!-- Panel: SÍ conoce su régimen → selector directo -->
+      <div id="regimen-panel-si" style="display:none;">
+        <select id="regimen-fiscal">
+          <option value="">— Selecciona tu régimen —</option>
+          <option value="RIF">Régimen de Incorporación Fiscal (RIF)</option>
+          <option value="RESICO">Régimen Simplificado de Confianza (RESICO)</option>
+          <option value="Act. Empresarial">Actividad Empresarial y Profesional</option>
+          <option value="Persona Moral General">Personas Morales — Régimen General</option>
+          <option value="Persona Moral Fines No Lucrativos">Personas Morales — Fines No Lucrativos</option>
+          <option value="Sueldos y Salarios">Sueldos y Salarios</option>
+          <option value="Arrendamiento">Arrendamiento</option>
+          <option value="Plataformas Tecnológicas">Plataformas Tecnológicas</option>
+        </select>
+        <button type="button" class="regimen-link" id="btn-no-se-regimen">No estoy seguro, ver guía →</button>
+      </div>
+
+      <!-- Panel: NO conoce su régimen → guía educativa -->
+      <div id="regimen-panel-no" style="display:none;">
+        <p style="font-size:.85rem;color:#6b7280;margin-bottom:.75rem;">
+          A continuación encontrarás los regímenes más comunes. Selecciona el que mejor describe tu situación, o déjalo en blanco si aún no estás seguro.
+        </p>
+        <div class="regimen-guia" id="regimen-guia-lista">
+
+          <div class="regimen-item" data-val="RESICO">
+            <div class="regimen-item-header">
+              <strong>RESICO</strong> — Régimen Simplificado de Confianza
+              <span class="regimen-badge regimen-badge-popular">Más común</span>
+            </div>
+            <p>Diseñado para personas físicas con ingresos anuales de hasta $3.5 millones de pesos. Tasa fija reducida (1 %–2.5 %). Ideal para emprendedores que inician.</p>
+            <div class="regimen-giros">
+              <span class="regimen-giro-tag">Comercio</span>
+              <span class="regimen-giro-tag">Servicios</span>
+              <span class="regimen-giro-tag">Tecnología</span>
+              <span class="regimen-giro-tag">Turismo</span>
+            </div>
+          </div>
+
+          <div class="regimen-item" data-val="Act. Empresarial">
+            <div class="regimen-item-header">
+              <strong>Actividad Empresarial y Profesional</strong>
+            </div>
+            <p>Para personas físicas que realizan actividades comerciales, industriales o profesionales sin límite de ingresos. Se declara ISR e IVA mensualmente.</p>
+            <div class="regimen-giros">
+              <span class="regimen-giro-tag">Manufactura</span>
+              <span class="regimen-giro-tag">Construcción</span>
+              <span class="regimen-giro-tag">Salud</span>
+              <span class="regimen-giro-tag">Educación</span>
+            </div>
+          </div>
+
+          <div class="regimen-item" data-val="Persona Moral General">
+            <div class="regimen-item-header">
+              <strong>Personas Morales — Régimen General</strong>
+            </div>
+            <p>Para S.A. de C.V., S. de R.L. de C.V., S.A.S. y otras sociedades mercantiles. ISR del 30 % sobre utilidades. Obligatorio llevar contabilidad completa.</p>
+            <div class="regimen-giros">
+              <span class="regimen-giro-tag">Manufactura</span>
+              <span class="regimen-giro-tag">Agroindustria</span>
+              <span class="regimen-giro-tag">Tecnología</span>
+              <span class="regimen-giro-tag">Construcción</span>
+            </div>
+          </div>
+
+          <div class="regimen-item" data-val="Persona Moral Fines No Lucrativos">
+            <div class="regimen-item-header">
+              <strong>Personas Morales — Fines No Lucrativos</strong>
+            </div>
+            <p>Para A.C. y S.C. que no distribuyen utilidades. Exentos de ISR siempre que destinen recursos a su objeto social.</p>
+            <div class="regimen-giros">
+              <span class="regimen-giro-tag">Educación</span>
+              <span class="regimen-giro-tag">Salud</span>
+              <span class="regimen-giro-tag">Asociaciones civiles</span>
+            </div>
+          </div>
+
+          <div class="regimen-item" data-val="Arrendamiento">
+            <div class="regimen-item-header">
+              <strong>Arrendamiento</strong>
+            </div>
+            <p>Para personas físicas que obtienen ingresos por rentar inmuebles. Se puede deducir el 35 % de los ingresos como deducción ciega sin comprobantes.</p>
+            <div class="regimen-giros">
+              <span class="regimen-giro-tag">Inmobiliario</span>
+              <span class="regimen-giro-tag">Turismo (hospedaje)</span>
+            </div>
+          </div>
+
+          <div class="regimen-item" data-val="Plataformas Tecnológicas">
+            <div class="regimen-item-header">
+              <strong>Plataformas Tecnológicas</strong>
+            </div>
+            <p>Para personas físicas que prestan servicios u obtienen ingresos a través de apps como Uber, Rappi, Airbnb o similares. Retención directa por la plataforma.</p>
+            <div class="regimen-giros">
+              <span class="regimen-giro-tag">Servicios de transporte</span>
+              <span class="regimen-giro-tag">Delivery</span>
+              <span class="regimen-giro-tag">Hospedaje digital</span>
+            </div>
+          </div>
+
+        </div>
+        <p class="regimen-skip">¿Aún no lo tienes claro? Puedes <button type="button" class="regimen-link" id="btn-saltar-regimen">dejar este campo vacío</button> y no afectará tu evaluación.</p>
+      </div>
+
+      <!-- Régimen seleccionado (confirmar selección desde la guía) -->
+      <div id="regimen-seleccionado" style="display:none;margin-top:.75rem;">
+        <div class="regimen-confirmado">
+          <span id="regimen-confirmado-label"></span>
+          <button type="button" class="regimen-link" id="btn-cambiar-regimen">Cambiar</button>
+        </div>
+      </div>
+
+      <input type="hidden" id="regimen-fiscal-val" />
     </div>
 
     <!-- Giro / Sector económico -->
@@ -114,23 +320,69 @@
     <div class="form-group">
       <label for="curp_rfc">CURP o RFC <span style="font-weight:400;color:#6b7280">(opcional)</span></label>
       <input type="text" id="curp_rfc" placeholder="XXXX000000XXXXXX00" autocomplete="off" />
-      <small>Si ya cuentas con él, agrégalo para autocompletar trámites más adelante.</small>
+      <small>Si ya cuentas con alguno, agrégalo para autocompletar trámites más adelante.</small>
       <span class="field-error" id="err-curp"></span>
     </div>
 
     <button class="btn btn-primary" id="btn-crear">Comenzar → Paso 2: Parámetros</button>
   </div>
+
 </div>
 
 <script src="/static/app.js"></script>
 <script>
-  // ── Giro comercial selection ──────────────────────────────
+  // ── Tipo de sociedad — lógica interactiva ─────────────────
+  function mostrarPanelSociedad(panel) {
+    document.getElementById("sociedad-panel-si").style.display  = "none";
+    document.getElementById("sociedad-panel-no").style.display  = "none";
+    document.getElementById("sociedad-seleccionada").style.display = "none";
+    if (panel) document.getElementById(panel).style.display = "block";
+  }
+
+  function confirmarSociedad(val, label) {
+    document.getElementById("giro-comercial").value = val;
+    document.getElementById("sociedad-confirmada-label").textContent = "✔ " + label;
+    document.getElementById("err-giro").textContent = "";
+    mostrarPanelSociedad(null);
+    document.getElementById("sociedad-seleccionada").style.display = "block";
+  }
+
+  document.getElementById("btn-sociedad-si").addEventListener("click", () => {
+    mostrarPanelSociedad("sociedad-panel-si");
+  });
+
+  document.getElementById("btn-sociedad-no").addEventListener("click", () => {
+    mostrarPanelSociedad("sociedad-panel-no");
+  });
+
+  document.getElementById("btn-no-se-sociedad").addEventListener("click", () => {
+    mostrarPanelSociedad("sociedad-panel-no");
+  });
+
+  document.getElementById("btn-cambiar-sociedad").addEventListener("click", () => {
+    document.getElementById("giro-comercial").value = "";
+    document.querySelectorAll("#sociedad-panel-no .regimen-item").forEach(i => i.classList.remove("regimen-item-selected"));
+    document.querySelectorAll(".giro-card").forEach(c => c.classList.remove("selected"));
+    mostrarPanelSociedad("sociedad-panel-no");
+  });
+
+  // Grid rápido (panel Sí)
   document.querySelectorAll(".giro-card").forEach(card => {
     card.addEventListener("click", () => {
       document.querySelectorAll(".giro-card").forEach(c => c.classList.remove("selected"));
       card.classList.add("selected");
-      document.getElementById("giro-comercial").value = card.dataset.val;
-      document.getElementById("err-giro").textContent = "";
+      confirmarSociedad(card.dataset.val, card.dataset.val);
+    });
+  });
+
+  // Tarjetas de guía (panel No)
+  document.querySelectorAll("#sociedad-panel-no .regimen-item").forEach(item => {
+    item.addEventListener("click", () => {
+      document.querySelectorAll("#sociedad-panel-no .regimen-item").forEach(i => i.classList.remove("regimen-item-selected"));
+      item.classList.add("regimen-item-selected");
+      const val   = item.dataset.val;
+      const label = item.dataset.label || item.querySelector("strong").textContent;
+      confirmarSociedad(val, label);
     });
   });
 
@@ -190,7 +442,7 @@
     const errNombre = validarNombre(nombre);
     if (errNombre) { setError("err-nombre", errNombre); valid = false; }
 
-    if (!giroComercial) { setError("err-giro", "Selecciona el tipo de sociedad."); valid = false; }
+    // Tipo de sociedad es opcional — no bloquea el envío
 
     if (!sector) { setError("err-sector", "Selecciona el sector económico."); valid = false; }
 
@@ -206,7 +458,7 @@
     }
 
     // Nombre completo con giro comercial = "Nombre S.A. de C.V."
-    const nombreCompleto = `${nombre} ${giroComercial}`;
+    const nombreCompleto = giroComercial ? `${nombre} ${giroComercial}` : nombre;
 
     try {
       const empresa = await apiFetch("/empresa", {
@@ -219,10 +471,72 @@
         }),
       });
       setEmpresaId(empresa.empresa_id);
+      // Guardar régimen en sessionStorage si fue seleccionado
+      const regimen = document.getElementById("regimen-fiscal-val").value;
+      if (regimen) sessionStorage.setItem("regimen_fiscal", regimen);
       window.location.href = "/parametros-page";
     } catch (e) {
       showAlert(alertEl, e.message);
     }
+  });
+
+  // ── Régimen fiscal — lógica interactiva ─────────────────────
+  function mostrarPanel(panel) {
+    document.getElementById("regimen-panel-si").style.display  = "none";
+    document.getElementById("regimen-panel-no").style.display  = "none";
+    document.getElementById("regimen-seleccionado").style.display = "none";
+    if (panel) document.getElementById(panel).style.display = "block";
+  }
+
+  function confirmarRegimen(val, label) {
+    document.getElementById("regimen-fiscal-val").value = val;
+    document.getElementById("regimen-confirmado-label").textContent = "✔ " + label;
+    mostrarPanel(null);
+    document.getElementById("regimen-seleccionado").style.display = "block";
+  }
+
+  // Botón "Sí, lo conozco"
+  document.getElementById("btn-regimen-si").addEventListener("click", () => {
+    mostrarPanel("regimen-panel-si");
+  });
+
+  // Botón "No estoy seguro"
+  document.getElementById("btn-regimen-no").addEventListener("click", () => {
+    mostrarPanel("regimen-panel-no");
+  });
+
+  // Selector directo (panel Sí)
+  document.getElementById("regimen-fiscal").addEventListener("change", function () {
+    if (this.value) confirmarRegimen(this.value, this.options[this.selectedIndex].text);
+  });
+
+  // "No estoy seguro, ver guía →" desde el panel Sí
+  document.getElementById("btn-no-se-regimen").addEventListener("click", () => {
+    mostrarPanel("regimen-panel-no");
+  });
+
+  // Selección desde la guía educativa — click en tarjeta
+  document.querySelectorAll(".regimen-item").forEach(item => {
+    item.addEventListener("click", () => {
+      document.querySelectorAll(".regimen-item").forEach(i => i.classList.remove("regimen-item-selected"));
+      item.classList.add("regimen-item-selected");
+      const val   = item.dataset.val;
+      const label = item.querySelector("strong").textContent;
+      confirmarRegimen(val, label);
+    });
+  });
+
+  // "Dejar vacío" — saltar sin seleccionar
+  document.getElementById("btn-saltar-regimen").addEventListener("click", () => {
+    document.getElementById("regimen-fiscal-val").value = "";
+    mostrarPanel(null);
+  });
+
+  // "Cambiar" desde el confirmado
+  document.getElementById("btn-cambiar-regimen").addEventListener("click", () => {
+    document.getElementById("regimen-fiscal-val").value = "";
+    document.querySelectorAll(".regimen-item").forEach(i => i.classList.remove("regimen-item-selected"));
+    mostrarPanel("regimen-panel-no");
   });
 </script>
 </body>

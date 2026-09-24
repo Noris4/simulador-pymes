@@ -298,15 +298,296 @@ nav .steps-nav a.active + .step-badge { background: var(--blue-600); color: #fff
 .score-num { font-size: 2rem; font-weight: 700; line-height: 1; }
 .score-label { font-size: .75rem; color: #6b7280; }
 
-/* ── Feedback box ─────────────────────────────────────────── */
-.feedback-box {
-  background: #fffbeb;
-  border: 1px solid #fcd34d;
+/* ── Feedback ─────────────────────────────────────────────── */
+.feedback-resumen p {
+  color: #374151;
+  font-size: .92rem;
+  line-height: 1.7;
+  margin-bottom: .9rem;
+}
+.feedback-resumen p:last-child { margin-bottom: 0; }
+
+.feedback-tabla-titulo {
+  font-size: .95rem;
+  font-weight: 700;
+  color: #1e3a5f;
+  margin-bottom: .75rem;
+}
+
+.feedback-tabla {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  border: 1px solid var(--blue-200);
   border-radius: 8px;
-  padding: 1.25rem;
-  white-space: pre-wrap;
+  overflow: hidden;
+  font-size: .88rem;
+}
+
+.feedback-col-header {
+  padding: .6rem .9rem;
+  font-weight: 700;
+  font-size: .82rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.feedback-col-left  { border-right: 1px solid var(--blue-200); }
+.feedback-col-left  .feedback-col-header { background: #fef2f2; color: #b91c1c; }
+.feedback-col-right .feedback-col-header { background: #f0fdf4; color: #15803d; }
+
+.feedback-fila {
+  padding: .65rem .9rem;
+  border-top: 1px solid var(--blue-100);
+  color: #374151;
+  line-height: 1.5;
+}
+
+.feedback-col-left  .feedback-fila { background: #fffbeb; }
+.feedback-col-right .feedback-fila { background: #f7fffe; }
+
+/* ── Aviso legal ──────────────────────────────────────────── */
+.aviso-legal {
+  font-size: .78rem;
+  color: #92400e;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 7px;
+  padding: .55rem .9rem;
+  line-height: 1.5;
+}
+.aviso-legal-top  { margin-bottom: 1.25rem; }
+.aviso-legal-bottom { margin-top: 1.25rem; }
+
+/* ── Conclusión ───────────────────────────────────────────── */
+.conclusion-pasos {
+  list-style: none;
+  margin-bottom: 1.75rem;
+}
+.conclusion-paso {
+  display: flex;
+  gap: .9rem;
+  align-items: flex-start;
+  padding: .85rem 0;
+  border-bottom: 1px solid var(--blue-100);
+}
+.conclusion-paso:last-child { border-bottom: none; }
+.conclusion-paso-icono {
+  min-width: 32px; height: 32px;
+  border-radius: 50%;
+  background: var(--blue-100);
+  border: 2px solid var(--blue-300);
+  color: var(--blue-700);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .85rem;
+  flex-shrink: 0;
+}
+.conclusion-paso strong { display: block; margin-bottom: .2rem; color: #1e3a5f; }
+.conclusion-paso p { font-size: .85rem; color: #6b7280; margin: 0; }
+
+.conclusion-siguientes {
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+  margin-bottom: 1rem;
+}
+.conclusion-sig-item {
+  display: flex;
+  gap: .75rem;
+  align-items: flex-start;
+  padding: .7rem .9rem;
+  background: var(--blue-50);
+  border: 1px solid var(--blue-200);
+  border-radius: 8px;
+}
+.conclusion-sig-num {
+  min-width: 26px; height: 26px;
+  border-radius: 50%;
+  background: var(--blue-500);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: .8rem;
+  flex-shrink: 0;
+}
+.conclusion-sig-item p { font-size: .87rem; color: #374151; margin: 0; }
+
+
+/* ── Régimen fiscal ───────────────────────────────────────── */
+.regimen-pregunta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .75rem;
+  padding: .65rem .9rem;
+  background: var(--blue-50);
+  border: 1px solid var(--blue-200);
+  border-radius: 8px;
   font-size: .9rem;
   color: #374151;
+}
+
+.regimen-opciones { display: flex; gap: .5rem; }
+
+.btn-regimen {
+  padding: .35rem .9rem;
+  border-radius: 6px;
+  border: 1.5px solid var(--blue-400);
+  background: #fff;
+  color: var(--blue-600);
+  font-size: .85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.btn-regimen:hover { background: var(--blue-100); }
+
+.regimen-link {
+  background: none;
+  border: none;
+  color: var(--blue-600);
+  font-size: .82rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  margin-top: .5rem;
+  display: inline-block;
+}
+
+.regimen-guia {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+}
+
+.regimen-item {
+  border: 1.5px solid var(--blue-200);
+  border-radius: 8px;
+  padding: .8rem 1rem;
+  cursor: pointer;
+  background: #fafdff;
+  transition: border-color .15s, background .15s;
+}
+.regimen-item:hover { border-color: var(--blue-400); background: var(--blue-50); }
+.regimen-item-selected { border-color: var(--blue-600); background: var(--blue-100); }
+
+.regimen-item-header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-bottom: .35rem;
+  font-size: .9rem;
+  color: #1e3a5f;
+}
+
+.regimen-item p {
+  font-size: .83rem;
+  color: #4b5563;
+  margin: 0 0 .5rem;
+}
+
+.regimen-badge {
+  font-size: .72rem;
+  font-weight: 700;
+  padding: .15rem .5rem;
+  border-radius: 99px;
+}
+.regimen-badge-popular { background: #fef9c3; color: #92400e; border: 1px solid #fde68a; }
+
+.regimen-giros { display: flex; flex-wrap: wrap; gap: .35rem; }
+.regimen-giro-tag {
+  font-size: .75rem;
+  background: var(--blue-100);
+  color: var(--blue-700);
+  border-radius: 99px;
+  padding: .1rem .55rem;
+  font-weight: 500;
+}
+
+.regimen-confirmado {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  padding: .55rem .9rem;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  font-size: .9rem;
+  font-weight: 600;
+  color: #15803d;
+}
+
+.regimen-skip {
+  margin-top: .75rem;
+  font-size: .83rem;
+  color: #6b7280;
+}
+
+/* ── Tramitología ─────────────────────────────────────────── */
+.tramit-loading {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  color: #6b7280;
+  font-size: .9rem;
+  padding: .75rem 0;
+}
+
+.tramit-spinner {
+  width: 20px; height: 20px;
+  border: 3px solid var(--blue-200);
+  border-top-color: var(--blue-500);
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.tramit-tabla {
+  border: 1px solid var(--blue-200);
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: .86rem;
+}
+
+.tramit-thead {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1fr 1fr;
+  background: #f0f7ff;
+  border-bottom: 1px solid var(--blue-200);
+}
+
+.tramit-th {
+  padding: .55rem .8rem;
+  font-weight: 700;
+  font-size: .78rem;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+  color: #1e3a5f;
+}
+
+.tramit-th-costo { text-align: right; }
+
+.tramit-row {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1fr 1fr;
+  border-top: 1px solid var(--blue-100);
+}
+
+.tramit-row-alt { background: #f7fbff; }
+
+.tramit-td {
+  padding: .6rem .8rem;
+  color: #374151;
+  line-height: 1.45;
+}
+
+.tramit-td-inst { color: #6b7280; font-size: .83rem; }
+
+.tramit-td-costo {
+  text-align: right;
+  font-weight: 600;
+  color: #1e3a5f;
 }
 
 /* ── Parameter evaluation highlights ─────────────────────── */

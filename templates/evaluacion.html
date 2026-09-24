@@ -14,7 +14,8 @@
     <li><a href="/">① Inicio</a></li>
     <li><a href="/parametros-page">② Parámetros</a></li>
     <li><a href="/evaluacion-page" class="active">③ Evaluación</a></li>
-    <li><a href="/registro-page">④ Registro</a></li>
+    <li><a href="/tramitologia-page">④ Tramitología</a></li>
+    <li><a href="/registro-page">⑤ Conclusión</a></li>
   </ul>
 </nav>
 
@@ -23,11 +24,11 @@
   <!-- Barra de progreso del flujo -->
   <div style="margin-bottom:1.5rem;">
     <div style="display:flex;justify-content:space-between;font-size:.8rem;color:#6b7280;margin-bottom:.35rem;">
-      <span>Paso 3 de 4</span>
-      <span>75 %</span>
+      <span>Paso 3 de 5</span>
+      <span>60 %</span>
     </div>
     <div class="progress-bar-wrap" style="margin:0;">
-      <div class="progress-bar-fill" style="width:75%"></div>
+      <div class="progress-bar-fill" style="width:60%"></div>
     </div>
   </div>
 
@@ -76,16 +77,29 @@
     <!-- Feedback (solo si reprueba) -->
     <div id="feedback-wrap" style="display:none;">
       <h2 style="margin-bottom:.75rem;">💬 Recomendaciones</h2>
-      <div class="feedback-box" id="feedback-texto"></div>
+      <div id="feedback-resumen" class="feedback-resumen"></div>
+      <div id="feedback-tabla-wrap" style="display:none;margin-top:1.25rem;">
+        <h3 class="feedback-tabla-titulo">Análisis comparativo</h3>
+        <div class="feedback-tabla">
+          <div class="feedback-col feedback-col-left">
+            <div class="feedback-col-header">Áreas de oportunidad</div>
+            <div id="feedback-col-debil"></div>
+          </div>
+          <div class="feedback-col feedback-col-right">
+            <div class="feedback-col-header">Acciones de mejora</div>
+            <div id="feedback-col-mejora"></div>
+          </div>
+        </div>
+      </div>
       <div style="margin-top:1.25rem;display:flex;gap:1rem;">
         <a href="/parametros-page" class="btn btn-outline">← Mejorar parámetros</a>
         <button class="btn btn-primary" id="btn-reevaluar">Volver a evaluar</button>
       </div>
     </div>
 
-    <!-- Botón continuar (solo si aprueba) -->
-    <div id="continuar-wrap" style="display:none;">
-      <a href="/registro-page" class="btn btn-success">Continuar → Paso 4: Registro</a>
+    <!-- Botón continuar después de evaluar (siempre visible al terminar) -->
+    <div id="continuar-wrap" style="display:none;margin-top:1.25rem;">
+      <a href="/tramitologia-page" class="btn btn-success">Continuar → Paso 4: Tramitología</a>
     </div>
   </div>
 
@@ -151,12 +165,90 @@
       </tr>`;
     }).join('');
 
-    if (!r.aprobado && r.feedback) {
-      document.getElementById("feedback-texto").textContent = r.feedback;
+    if (r.feedback) {
+      renderFeedback(r.feedback);
       document.getElementById("feedback-wrap").style.display = "block";
-    } else if (r.aprobado) {
-      document.getElementById("continuar-wrap").style.display = "block";
     }
+    // Botón continuar siempre visible al terminar (apruebe o no)
+    document.getElementById("continuar-wrap").style.display = "block";
+  }
+
+  function renderFeedback(texto) {
+    // Busca los marcadores con variantes (el LLM puede devolver mayúsculas/minúsculas o con asteriscos)
+    const buscar = (marca) => {
+      const re = new RegExp(marca, "i");
+      const m  = re.exec(texto);
+      return m ? m.index : -1;
+    };
+
+    const posResumen = buscar("\\*{0,2}RESUMEN\\*{0,2}");
+    const posTabla   = buscar("\\*{0,2}TABLA\\*{0,2}");
+
+    // --- Párrafos de resumen ---
+    const resumenEl = document.getElementById("feedback-resumen");
+    resumenEl.innerHTML = "";
+    let textoResumen = texto;
+
+    if (posResumen !== -1) {
+      const fin = posTabla !== -1 ? posTabla : texto.length;
+      // Saltamos el marcador mismo (hasta 20 chars para cubrir "**RESUMEN**\n")
+      const inicio = texto.indexOf("\n", posResumen) + 1 || posResumen + 7;
+      textoResumen = texto.slice(inicio, fin);
+    } else if (posTabla !== -1) {
+      textoResumen = texto.slice(0, posTabla);
+    }
+
+    textoResumen.trim().split(/\n{1,}/).forEach(linea => {
+      const p = linea.replace(/^\*+|\*+$/g, "").trim();  // quita asteriscos de negrita del LLM
+      if (p) {
+        const el = document.createElement("p");
+        el.textContent = p;
+        resumenEl.appendChild(el);
+      }
+    });
+
+    // --- Cuadro comparativo ---
+    // Buscar cualquier línea con "|" después del marcador TABLA (o en todo el texto si no hay marcador)
+    const inicioTabla = posTabla !== -1
+      ? (texto.indexOf("\n", posTabla) + 1 || posTabla + 5)
+      : 0;
+    const textoTabla = texto.slice(inicioTabla);
+    const filas = textoTabla.split("\n")
+      .map(l => l.replace(/^\*+|\*+$/g, "").trim())  // quita asteriscos
+      .filter(l => l.includes("|") && !l.match(/^[-|]+$/));  // excluye líneas separadoras tipo |---|
+
+    if (filas.length === 0) {
+      // Fallback: si el LLM no puso "|", mostrar todo el texto restante como lista simple
+      const colDebil  = document.getElementById("feedback-col-debil");
+      const colMejora = document.getElementById("feedback-col-mejora");
+      colDebil.innerHTML  = "";
+      colMejora.innerHTML = "";
+      document.getElementById("feedback-tabla-wrap").style.display = "block";
+      return;
+    }
+
+    const colDebil  = document.getElementById("feedback-col-debil");
+    const colMejora = document.getElementById("feedback-col-mejora");
+    colDebil.innerHTML  = "";
+    colMejora.innerHTML = "";
+
+    filas.forEach(fila => {
+      const partes = fila.split("|").map(s => s.replace(/^\*+|\*+$/g, "").trim());
+      const izq = partes[0] || "";
+      const der = partes[1] || "";
+
+      const elIzq = document.createElement("div");
+      elIzq.className = "feedback-fila";
+      elIzq.textContent = izq;
+      colDebil.appendChild(elIzq);
+
+      const elDer = document.createElement("div");
+      elDer.className = "feedback-fila";
+      elDer.textContent = der;
+      colMejora.appendChild(elDer);
+    });
+
+    document.getElementById("feedback-tabla-wrap").style.display = "block";
   }
 </script>
 </body>

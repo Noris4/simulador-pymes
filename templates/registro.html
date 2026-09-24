@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lazuli-KPI — Registro</title>
+  <title>Lazuli-KPI — Conclusión</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
@@ -14,16 +14,22 @@
     <li><a href="/">① Inicio</a></li>
     <li><a href="/parametros-page">② Parámetros</a></li>
     <li><a href="/evaluacion-page">③ Evaluación</a></li>
-    <li><a href="/registro-page" class="active">④ Registro</a></li>
+    <li><a href="/tramitologia-page">④ Tramitología</a></li>
+    <li><a href="/registro-page" class="active">⑤ Conclusión</a></li>
   </ul>
 </nav>
 
 <div class="container">
 
+  <!-- Aviso legal — inicio -->
+  <div class="aviso-legal aviso-legal-top">
+    ⚠️ A pesar de que nuestro agente de IA genera un análisis y tramitología de manera rigurosa, aun así puede haber fallos, para un mejor seguimiento de estos resultados, consultar a un asesor legal.
+  </div>
+
   <!-- Barra de progreso del flujo -->
   <div style="margin-bottom:1.5rem;">
     <div style="display:flex;justify-content:space-between;font-size:.8rem;color:#6b7280;margin-bottom:.35rem;">
-      <span>Paso 4 de 4</span>
+      <span>Paso 5 de 5</span>
       <span>100 %</span>
     </div>
     <div class="progress-bar-wrap" style="margin:0;">
@@ -31,56 +37,92 @@
     </div>
   </div>
 
-  <!-- Documento de registro -->
-  <div class="card" id="panel-documento" style="display:none;">
+  <div class="card" id="panel-cargando">
+    <p style="color:#9ca3af;">Cargando resumen…</p>
+  </div>
+
+  <!-- Conclusión principal -->
+  <div class="card" id="panel-conclusion" style="display:none;">
     <div class="step-header">
-      <div class="step-num-big">4</div>
+      <div class="step-num-big">5</div>
       <div>
-        <div class="step-title">Documento de registro</div>
-        <div class="step-subtitle">Tu empresa aprobó la evaluación. Revisa el resumen y confirma el registro oficial.</div>
+        <div class="step-title">Conclusión de tu proceso</div>
+        <div class="step-subtitle">Resumen de los pasos completados durante tu proceso de evaluación empresarial en Lazuli-KPI.</div>
       </div>
     </div>
 
-    <table id="tabla-doc" style="width:100%;border-collapse:collapse;font-size:.92rem;margin-bottom:1.5rem;">
-      <tbody id="doc-body"></tbody>
+    <!-- Resumen de la empresa -->
+    <h2 style="margin-bottom:.75rem;">Datos de tu empresa</h2>
+    <table id="tabla-resumen" style="width:100%;border-collapse:collapse;font-size:.92rem;margin-bottom:1.75rem;">
+      <tbody id="resumen-body"></tbody>
     </table>
 
-    <div style="background:#f0fdf4;border:1px solid #86efac;border-radius:8px;padding:1rem;margin-bottom:1.5rem;font-size:.88rem;color:#166534;">
-      <strong>Trámites pendientes ante las autoridades:</strong>
-      <ul id="tramites-list" style="margin-top:.5rem;padding-left:1.25rem;"></ul>
-    </div>
+    <!-- Pasos completados -->
+    <h2 style="margin-bottom:.75rem;">Pasos realizados</h2>
+    <ul class="conclusion-pasos">
+      <li class="conclusion-paso">
+        <div class="conclusion-paso-icono">①</div>
+        <div>
+          <strong>Perfil de la empresa</strong>
+          <p>Registraste el nombre comercial, tipo de sociedad, sector económico, fundador y régimen fiscal de tu negocio.</p>
+        </div>
+      </li>
+      <li class="conclusion-paso">
+        <div class="conclusion-paso-icono">②</div>
+        <div>
+          <strong>Parámetros de viabilidad</strong>
+          <p>Ingresaste los 7 factores clave: capital inicial, sector, número de empleados, plan de ventas, plan financiero, análisis de mercado y registro legal.</p>
+        </div>
+      </li>
+      <li class="conclusion-paso">
+        <div class="conclusion-paso-icono">③</div>
+        <div>
+          <strong>Evaluación de viabilidad</strong>
+          <p id="paso-evaluacion-detalle">Tu propuesta fue evaluada y obtuviste una calificación sobre 100 puntos. Se generaron recomendaciones personalizadas para fortalecer tu plan de negocio.</p>
+        </div>
+      </li>
+      <li class="conclusion-paso">
+        <div class="conclusion-paso-icono">④</div>
+        <div>
+          <strong>Tramitología requerida</strong>
+          <p>Se identificaron los permisos, trámites y costos estimados necesarios para operar legalmente en Baja California según tu giro de negocio.</p>
+        </div>
+      </li>
+      <li class="conclusion-paso">
+        <div class="conclusion-paso-icono">⑤</div>
+        <div>
+          <strong>Conclusión</strong>
+          <p>Has completado el proceso de análisis. Revisa las recomendaciones y la tramitología antes de dar los siguientes pasos reales.</p>
+        </div>
+      </li>
+    </ul>
 
-    <div id="alert-reg" class="alert"></div>
-
-    <div style="display:flex;gap:1rem;">
-      <button class="btn btn-success" id="btn-confirmar">Confirmar registro oficial ✓</button>
-    </div>
-  </div>
-
-  <!-- Panel de no elegible -->
-  <div class="card" id="panel-no-elegible" style="display:none;">
-    <div class="step-header">
-      <div class="step-num-big">4</div>
-      <div>
-        <div class="step-title">Registro no disponible</div>
+    <!-- Siguientes pasos recomendados -->
+    <h2 style="margin-bottom:.75rem;">¿Qué sigue?</h2>
+    <div class="conclusion-siguientes">
+      <div class="conclusion-sig-item">
+        <div class="conclusion-sig-num">1</div>
+        <p>Revisa las recomendaciones de la evaluación y fortalece las áreas identificadas como oportunidades de mejora.</p>
+      </div>
+      <div class="conclusion-sig-item">
+        <div class="conclusion-sig-num">2</div>
+        <p>Consulta la tramitología de tu giro e inicia los trámites prioritarios ante las instancias correspondientes en Baja California.</p>
+      </div>
+      <div class="conclusion-sig-item">
+        <div class="conclusion-sig-num">3</div>
+        <p>Acude a un contador o asesor empresarial para formalizar tu RFC, inscripción ante el IMSS y obtención de licencia de funcionamiento.</p>
       </div>
     </div>
-    <div id="alert-no-elegible" class="alert alert-error show"></div>
-    <a href="/evaluacion-page" class="btn btn-primary" style="margin-top:1rem;">← Ir a evaluación</a>
+
+    <div style="margin-top:1.5rem;display:flex;gap:1rem;flex-wrap:wrap;">
+      <a href="/tramitologia-page" class="btn btn-outline">← Ver tramitología</a>
+      <a href="/" class="btn btn-primary">Evaluar otra empresa</a>
+    </div>
   </div>
 
-  <!-- Panel de éxito final -->
-  <div class="card" id="panel-exito" style="display:none;text-align:center;">
-    <div style="font-size:3rem;margin-bottom:1rem;">🎉</div>
-    <h1>¡Empresa registrada!</h1>
-    <p style="margin-top:.5rem;">Tu empresa ha sido oficialmente registrada en el sistema. ¡Mucho éxito en tu nueva aventura empresarial en Baja California!</p>
-    <p id="fecha-registro" style="margin-top:1rem;color:#6b7280;font-size:.85rem;"></p>
-    <a href="/" class="btn btn-outline" style="margin-top:1.5rem;">Registrar otra empresa</a>
-  </div>
-
-  <!-- Loading inicial -->
-  <div class="card" id="panel-cargando">
-    <p style="color:#9ca3af;">Verificando elegibilidad…</p>
+  <!-- Aviso legal — final -->
+  <div class="aviso-legal aviso-legal-bottom">
+    ⚠️ A pesar de que nuestro agente de IA genera un análisis y tramitología de manera rigurosa, aun así puede haber fallos, para un mejor seguimiento de estos resultados, consultar a un asesor legal.
   </div>
 
 </div>
@@ -91,80 +133,51 @@
 
   async function init() {
     if (!empresaId) {
-      mostrarNoElegible("Primero crea tu empresa en la página de inicio.");
+      document.getElementById("panel-cargando").innerHTML =
+        '<p style="color:#b91c1c;">No se encontró una empresa activa. <a href="/">Volver al inicio</a></p>';
       return;
     }
 
     try {
-      const estado = await apiFetch(`/empresa/${empresaId}/registro/estado`);
-      if (estado.estado === "registrada") {
-        mostrarExito(estado.fecha_registro);
-        return;
+      const empresa = await apiFetch(`/empresa/${empresaId}`);
+      const params  = await apiFetch(`/empresa/${empresaId}/parametros`).catch(() => null);
+      const evals   = await apiFetch(`/empresa/${empresaId}/evaluaciones`).catch(() => []);
+
+      document.getElementById("panel-cargando").style.display   = "none";
+      document.getElementById("panel-conclusion").style.display = "block";
+
+      // Tabla resumen empresa
+      const ultima = Array.isArray(evals) && evals.length ? evals[evals.length - 1] : null;
+      const campos = {
+        "Nombre de la empresa": empresa.nombre || "—",
+        "Sector / Giro":        empresa.giro   || "—",
+        "Fundador":             empresa.fundador || "—",
+        "CURP / RFC":           empresa.curp_rfc || "—",
+        "Capital inicial":      params ? `$${(params.capital_inicial || 0).toLocaleString("es-MX")} MXN` : "—",
+        "Número de empleados":  params ? params.num_empleados : "—",
+        "Calificación obtenida": ultima ? `${ultima.calificacion.toFixed(1)} / 100 (${ultima.aprobado ? "✅ Aprobado" : "❌ No aprobado"})` : "—",
+      };
+
+      document.getElementById("resumen-body").innerHTML =
+        Object.entries(campos).map(([k, v]) => `
+          <tr style="border-bottom:1px solid #f0f7ff;">
+            <td style="padding:.5rem .75rem;font-weight:600;color:#374151;width:45%;">${k}</td>
+            <td style="padding:.5rem .75rem;color:#4b5563;">${v}</td>
+          </tr>
+        `).join('');
+
+      // Detalle en el paso de evaluación
+      if (ultima) {
+        document.getElementById("paso-evaluacion-detalle").textContent =
+          `Tu propuesta fue evaluada y obtuviste ${ultima.calificacion.toFixed(1)}/100 puntos` +
+          (ultima.aprobado ? ", aprobando la evaluación de viabilidad." : ". Se generaron recomendaciones para mejorar tu plan de negocio.");
       }
 
-      const doc = await apiFetch(`/empresa/${empresaId}/registro/documento`);
-      if (doc.error) {
-        mostrarNoElegible(doc.error);
-      } else {
-        mostrarDocumento(doc);
-      }
     } catch (e) {
-      mostrarNoElegible(e.message);
+      document.getElementById("panel-cargando").innerHTML =
+        `<p style="color:#b91c1c;">Error al cargar el resumen: ${e.message}</p>`;
     }
   }
-
-  function mostrarDocumento(doc) {
-    document.getElementById("panel-cargando").style.display  = "none";
-    document.getElementById("panel-documento").style.display = "block";
-
-    const campos = {
-      "Nombre de la empresa":         doc.nombre_empresa,
-      "Giro / Sector":                doc.giro_sector,
-      "Fundador":                     doc.fundador,
-      "CURP / RFC":                   doc.curp_rfc || "—",
-      "Capital inicial":              doc.capital_inicial_mxn ? `$${doc.capital_inicial_mxn.toLocaleString()} MXN` : "—",
-      "Número de empleados":          doc.num_empleados,
-      "Calificación de viabilidad":   `${doc.calificacion_viabilidad?.toFixed(1)} / 100`,
-      "Fecha de evaluación":          doc.fecha_evaluacion ? new Date(doc.fecha_evaluacion).toLocaleDateString("es-MX") : "—",
-    };
-
-    document.getElementById("doc-body").innerHTML = Object.entries(campos).map(([k, v]) => `
-      <tr style="border-bottom:1px solid #f0f7ff;">
-        <td style="padding:.5rem .75rem;font-weight:600;color:#374151;width:45%;">${k}</td>
-        <td style="padding:.5rem .75rem;">${v}</td>
-      </tr>
-    `).join('');
-
-    const tramitesList = document.getElementById("tramites-list");
-    tramitesList.innerHTML = (doc.tramites_pendientes || []).map(t => `<li>${t}</li>`).join('');
-  }
-
-  function mostrarNoElegible(msg) {
-    document.getElementById("panel-cargando").style.display     = "none";
-    document.getElementById("panel-no-elegible").style.display  = "block";
-    document.getElementById("alert-no-elegible").textContent    = msg;
-  }
-
-  function mostrarExito(fecha) {
-    document.getElementById("panel-cargando").style.display = "none";
-    document.getElementById("panel-exito").style.display    = "block";
-    if (fecha) {
-      document.getElementById("fecha-registro").textContent =
-        `Registrada el ${new Date(fecha).toLocaleDateString("es-MX")}`;
-    }
-  }
-
-  document.getElementById("btn-confirmar")?.addEventListener("click", async () => {
-    const alertEl = document.getElementById("alert-reg");
-    hideAlert(alertEl);
-    try {
-      const res = await apiFetch(`/empresa/${empresaId}/registro/confirmar`, { method: "POST" });
-      if (res.error) { showAlert(alertEl, res.error); return; }
-      mostrarExito(res.fecha_registro);
-    } catch (e) {
-      showAlert(alertEl, e.message);
-    }
-  });
 
   init();
 </script>

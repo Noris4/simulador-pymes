@@ -134,9 +134,7 @@ def evaluar_empresa(empresa_id: str) -> dict:
     calificacion_total = round(calificacion_total, 2)
     aprobado = calificacion_total >= CALIFICACION_MINIMA
 
-    feedback = ""
-    if not aprobado:
-        feedback = generar_feedback(empresa_id, detalle, calificacion_total)
+    feedback = generar_feedback(empresa_id, detalle, calificacion_total)
 
     resultado = {
         "empresa_id": empresa_id,
@@ -161,25 +159,67 @@ def generar_feedback(empresa_id: str, detalle: dict, calificacion: float) -> str
     Construye un prompt con los resultados numéricos de la evaluación
     y lo envía al LLM en IBM watsonx para que genere recomendaciones en lenguaje natural.
 
-    Si la API no está disponible, retorna un mensaje de texto plano
-    con las áreas de oportunidad identificadas.
+    Se genera siempre: si aprobó, el tono es de mejora continua;
+    si no aprobó, el tono es de corrección. Si no hay áreas de oportunidad
+    (puntaje perfecto), retorna cadena vacía.
     """
-    # Identificar parámetros que no alcanzaron el puntaje máximo
-    areas_oportunidad = [
-        f"- {nombre}: obtuvo {info['puntaje_obtenido']:.1f} de {info['puntaje_maximo']:.1f} puntos"
-        for nombre, info in detalle.items()
-        if info["puntaje_obtenido"] < info["puntaje_maximo"]
-    ]
+    # Identificar parámetros que no alcanzaron el puntaje máximo — deduplicados por nombre
+    vistos: set[str] = set()
+    areas_oportunidad = []
+    for nombre, info in detalle.items():
+        if info["puntaje_obtenido"] < info["puntaje_maximo"]:
+            nombre_legible = nombre.replace("_", " ")
+            if nombre_legible not in vistos:
+                vistos.add(nombre_legible)
+                areas_oportunidad.append(
+                    f"- {nombre_legible}: obtuvo {info['puntaje_obtenido']:.1f} de {info['puntaje_maximo']:.1f} puntos"
+                )
+
+    # Puntaje perfecto — no hay nada que mejorar
+    if not areas_oportunidad:
+        return ""
+
+    aprobado = calificacion >= CALIFICACION_MINIMA
+
+    if aprobado:
+        intro = (
+            f"Eres un asesor de negocios experto en el contexto empresarial de Baja California, México.\n"
+            f"Una empresa obtuvo una calificación de {calificacion:.1f}/100 y ha aprobado la evaluación de viabilidad "
+            f"(mínimo aprobatorio: {CALIFICACION_MINIMA}). Sin embargo, algunos parámetros no alcanzaron el puntaje "
+            f"máximo posible, lo que representa oportunidades de crecimiento.\n\n"
+            f"Los aspectos que aún pueden fortalecerse son:\n"
+        )
+        cierre = (
+            "\n\nDesde una perspectiva de mejora continua, proporciona recomendaciones específicas y prácticas "
+            "contextualizadas a Baja California para que la empresa maximice su potencial en cada una de estas áreas."
+        )
+    else:
+        intro = (
+            f"Eres un asesor de negocios experto en el contexto empresarial de Baja California, México.\n"
+            f"Una empresa obtuvo una calificación de {calificacion:.1f}/100 en su evaluación de viabilidad, "
+            f"cuando el mínimo aprobatorio es {CALIFICACION_MINIMA}.\n\n"
+            f"Las áreas donde la empresa no alcanzó el puntaje máximo son:\n"
+        )
+        cierre = (
+            "\n\nProporciona recomendaciones específicas, prácticas y contextualizadas a Baja California "
+            "para que la empresa mejore cada una de estas áreas y pueda aprobar la evaluación en su siguiente intento."
+        )
 
     prompt = (
-        f"Eres un asesor de negocios experto en el contexto empresarial de Baja California, México.\n"
-        f"Una empresa obtuvo una calificación de {calificacion:.1f}/100 en su evaluación de viabilidad, "
-        f"cuando el mínimo aprobatorio es {CALIFICACION_MINIMA}.\n\n"
-        f"Las áreas donde la empresa no alcanzó el puntaje máximo son:\n"
+        intro
         + "\n".join(areas_oportunidad)
-        + "\n\nPor favor proporciona recomendaciones específicas, prácticas y contextualizadas "
-        f"a Baja California para que la empresa mejore cada una de estas áreas y pueda aprobar "
-        f"la evaluación en su siguiente intento."
+        + cierre
+        + "\n\n"
+        "Responde EXACTAMENTE con el siguiente formato y nada más:\n\n"
+        "RESUMEN\n"
+        "<dos o tres párrafos de texto plano, sin asteriscos ni bullets, explicando la situación general de la empresa>\n\n"
+        "TABLA\n"
+        "<área a mejorar> | <recomendación desarrollada y específica para esa área, con al menos 2 acciones concretas>\n"
+        "... (una fila por cada área, sin repetir ningún área)\n\n"
+        "Reglas importantes: cada área debe aparecer UNA SOLA VEZ en la tabla. "
+        "Si varias áreas están relacionadas, agrúpalas en una sola fila con el nombre más representativo. "
+        "No incluyas encabezados, asteriscos, guiones, numeración ni ningún otro formato. "
+        "Solo texto plano en los párrafos y el separador | en la tabla."
     )
 
     return _llamar_llm(prompt)
