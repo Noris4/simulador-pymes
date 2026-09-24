@@ -3,26 +3,42 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JahirLandia — Parámetros</title>
+  <title>Lazuli-KPI — Parámetros</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
 
 <nav>
-  <span class="brand">🏢 JahirLandia</span>
+  <span class="brand">💎 Lazuli-KPI</span>
   <ul class="steps-nav">
-    <li><a href="/">Inicio</a></li>
-    <li><a href="/guia-page">Guía</a></li>
-    <li><a href="/parametros-page">Parámetros</a></li>
-    <li><a href="/evaluacion-page">Evaluación</a></li>
-    <li><a href="/registro-page">Registro</a></li>
+    <li><a href="/">① Inicio</a></li>
+    <li><a href="/parametros-page" class="active">② Parámetros</a></li>
+    <li><a href="/evaluacion-page">③ Evaluación</a></li>
+    <li><a href="/registro-page">④ Registro</a></li>
   </ul>
 </nav>
 
 <div class="container">
+
+  <!-- Barra de progreso del flujo -->
+  <div style="margin-bottom:1.5rem;">
+    <div style="display:flex;justify-content:space-between;font-size:.8rem;color:#6b7280;margin-bottom:.35rem;">
+      <span>Paso 2 de 4</span>
+      <span>50 %</span>
+    </div>
+    <div class="progress-bar-wrap" style="margin:0;">
+      <div class="progress-bar-fill" style="width:50%"></div>
+    </div>
+  </div>
+
   <div class="card">
-    <h1>Parámetros de tu empresa</h1>
-    <p>Completa los 7 parámetros. Con ellos, Bob evaluará la viabilidad de tu empresa en el contexto de Baja California.</p>
+    <div class="step-header">
+      <div class="step-num-big">2</div>
+      <div>
+        <div class="step-title">Parámetros de tu empresa</div>
+        <div class="step-subtitle">Completa los 7 factores. Bob los usará para evaluar la viabilidad de tu negocio.</div>
+      </div>
+    </div>
 
     <div id="alert" class="alert"></div>
 
@@ -33,7 +49,7 @@
     </div>
 
     <div class="form-group">
-      <label for="giro">Giro / Sector</label>
+      <label for="giro">Sector (se pre-llenará desde el inicio)</label>
       <select id="giro">
         <option value="">— Selecciona —</option>
         <option value="comercio">Comercio</option>
@@ -79,7 +95,7 @@
       </label>
     </div>
 
-    <button class="btn btn-primary" id="btn-guardar">Guardar y continuar →</button>
+    <button class="btn btn-primary" id="btn-guardar">Guardar y continuar → Paso 3: Evaluación</button>
   </div>
 </div>
 
@@ -87,19 +103,30 @@
 <script>
   const empresaId = getEmpresaId();
 
-  /* Pre-cargar si ya existen parámetros guardados */
+  /* Redirigir si no hay empresa creada */
+  if (!empresaId) {
+    showAlert(document.createElement("div"), "");
+    window.location.href = "/";
+  }
+
+  /* Pre-cargar datos de la empresa para rellenar el sector */
   async function precargar() {
     if (!empresaId) return;
     try {
+      const empresa = await apiFetch(`/empresa/${empresaId}`);
+      if (empresa.giro) document.getElementById("giro").value = empresa.giro;
+    } catch (_) {}
+
+    try {
       const p = await apiFetch(`/empresa/${empresaId}/parametros`);
-      document.getElementById("capital").value       = p.capital_inicial ?? "";
-      document.getElementById("giro").value          = p.giro_sector ?? "";
-      document.getElementById("empleados").value     = p.num_empleados ?? "";
-      document.getElementById("plan-ventas").value   = p.plan_ventas ?? "";
+      document.getElementById("capital").value         = p.capital_inicial ?? "";
+      document.getElementById("giro").value            = p.giro_sector ?? document.getElementById("giro").value;
+      document.getElementById("empleados").value       = p.num_empleados ?? "";
+      document.getElementById("plan-ventas").value     = p.plan_ventas ?? "";
       document.getElementById("plan-financiero").value = p.plan_financiero ?? "";
-      document.getElementById("analisis").value      = p.analisis_mercado ?? "";
+      document.getElementById("analisis").value        = p.analisis_mercado ?? "";
       document.getElementById("registro-legal").checked = p.registro_legal ?? false;
-    } catch (_) { /* no hay parámetros aún, está bien */ }
+    } catch (_) {}
   }
 
   document.getElementById("btn-guardar").addEventListener("click", async () => {

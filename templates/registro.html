@@ -3,28 +3,43 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JahirLandia — Registro</title>
+  <title>Lazuli-KPI — Registro</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
 
 <nav>
-  <span class="brand">🏢 JahirLandia</span>
+  <span class="brand">💎 Lazuli-KPI</span>
   <ul class="steps-nav">
-    <li><a href="/">Inicio</a></li>
-    <li><a href="/guia-page">Guía</a></li>
-    <li><a href="/parametros-page">Parámetros</a></li>
-    <li><a href="/evaluacion-page">Evaluación</a></li>
-    <li><a href="/registro-page">Registro</a></li>
+    <li><a href="/">① Inicio</a></li>
+    <li><a href="/parametros-page">② Parámetros</a></li>
+    <li><a href="/evaluacion-page">③ Evaluación</a></li>
+    <li><a href="/registro-page" class="active">④ Registro</a></li>
   </ul>
 </nav>
 
 <div class="container">
 
+  <!-- Barra de progreso del flujo -->
+  <div style="margin-bottom:1.5rem;">
+    <div style="display:flex;justify-content:space-between;font-size:.8rem;color:#6b7280;margin-bottom:.35rem;">
+      <span>Paso 4 de 4</span>
+      <span>100 %</span>
+    </div>
+    <div class="progress-bar-wrap" style="margin:0;">
+      <div class="progress-bar-fill" style="width:100%"></div>
+    </div>
+  </div>
+
   <!-- Documento de registro -->
   <div class="card" id="panel-documento" style="display:none;">
-    <h1>Documento de registro</h1>
-    <p>Tu empresa aprobó la evaluación. Revisa el resumen y confirma el registro oficial.</p>
+    <div class="step-header">
+      <div class="step-num-big">4</div>
+      <div>
+        <div class="step-title">Documento de registro</div>
+        <div class="step-subtitle">Tu empresa aprobó la evaluación. Revisa el resumen y confirma el registro oficial.</div>
+      </div>
+    </div>
 
     <table id="tabla-doc" style="width:100%;border-collapse:collapse;font-size:.92rem;margin-bottom:1.5rem;">
       <tbody id="doc-body"></tbody>
@@ -44,9 +59,14 @@
 
   <!-- Panel de no elegible -->
   <div class="card" id="panel-no-elegible" style="display:none;">
-    <h1>Registro no disponible</h1>
+    <div class="step-header">
+      <div class="step-num-big">4</div>
+      <div>
+        <div class="step-title">Registro no disponible</div>
+      </div>
+    </div>
     <div id="alert-no-elegible" class="alert alert-error show"></div>
-    <a href="/evaluacion-page" class="btn btn-primary" style="margin-top:1rem;">Ir a evaluación →</a>
+    <a href="/evaluacion-page" class="btn btn-primary" style="margin-top:1rem;">← Ir a evaluación</a>
   </div>
 
   <!-- Panel de éxito final -->
@@ -55,6 +75,7 @@
     <h1>¡Empresa registrada!</h1>
     <p style="margin-top:.5rem;">Tu empresa ha sido oficialmente registrada en el sistema. ¡Mucho éxito en tu nueva aventura empresarial en Baja California!</p>
     <p id="fecha-registro" style="margin-top:1rem;color:#6b7280;font-size:.85rem;"></p>
+    <a href="/" class="btn btn-outline" style="margin-top:1.5rem;">Registrar otra empresa</a>
   </div>
 
   <!-- Loading inicial -->
@@ -75,14 +96,12 @@
     }
 
     try {
-      // Ver si ya está registrada
       const estado = await apiFetch(`/empresa/${empresaId}/registro/estado`);
       if (estado.estado === "registrada") {
         mostrarExito(estado.fecha_registro);
         return;
       }
 
-      // Intentar preparar documento
       const doc = await apiFetch(`/empresa/${empresaId}/registro/documento`);
       if (doc.error) {
         mostrarNoElegible(doc.error);
@@ -99,18 +118,18 @@
     document.getElementById("panel-documento").style.display = "block";
 
     const campos = {
-      "Nombre de la empresa": doc.nombre_empresa,
-      "Giro / Sector":        doc.giro_sector,
-      "Fundador":             doc.fundador,
-      "CURP / RFC":           doc.curp_rfc || "—",
-      "Capital inicial":      doc.capital_inicial_mxn ? `$${doc.capital_inicial_mxn.toLocaleString()} MXN` : "—",
-      "Número de empleados":  doc.num_empleados,
-      "Calificación de viabilidad": `${doc.calificacion_viabilidad?.toFixed(1)} / 100`,
-      "Fecha de evaluación":  doc.fecha_evaluacion ? new Date(doc.fecha_evaluacion).toLocaleDateString("es-MX") : "—",
+      "Nombre de la empresa":         doc.nombre_empresa,
+      "Giro / Sector":                doc.giro_sector,
+      "Fundador":                     doc.fundador,
+      "CURP / RFC":                   doc.curp_rfc || "—",
+      "Capital inicial":              doc.capital_inicial_mxn ? `$${doc.capital_inicial_mxn.toLocaleString()} MXN` : "—",
+      "Número de empleados":          doc.num_empleados,
+      "Calificación de viabilidad":   `${doc.calificacion_viabilidad?.toFixed(1)} / 100`,
+      "Fecha de evaluación":          doc.fecha_evaluacion ? new Date(doc.fecha_evaluacion).toLocaleDateString("es-MX") : "—",
     };
 
     document.getElementById("doc-body").innerHTML = Object.entries(campos).map(([k, v]) => `
-      <tr style="border-bottom:1px solid #f3f4f6;">
+      <tr style="border-bottom:1px solid #f0f7ff;">
         <td style="padding:.5rem .75rem;font-weight:600;color:#374151;width:45%;">${k}</td>
         <td style="padding:.5rem .75rem;">${v}</td>
       </tr>

@@ -10,10 +10,6 @@ app = Flask(__name__)
 def index():
     return render_template("index.html")
 
-@app.route("/guia-page")
-def guia_page():
-    return render_template("guia.html")
-
 @app.route("/parametros-page")
 def parametros_page():
     return render_template("parametros.html")

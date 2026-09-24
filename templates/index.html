@@ -3,36 +3,91 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JahirLandia — Crea tu empresa</title>
+  <title>Lazuli-KPI — Inicio</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
 
 <nav>
-  <span class="brand">🏢 JahirLandia</span>
+  <span class="brand">💎 Lazuli-KPI</span>
   <ul class="steps-nav">
-    <li><a href="/">Inicio</a></li>
-    <li><a href="/guia-page">Guía</a></li>
-    <li><a href="/parametros-page">Parámetros</a></li>
-    <li><a href="/evaluacion-page">Evaluación</a></li>
-    <li><a href="/registro-page">Registro</a></li>
+    <li><a href="/" class="active">① Inicio</a></li>
+    <li><a href="/parametros-page">② Parámetros</a></li>
+    <li><a href="/evaluacion-page">③ Evaluación</a></li>
+    <li><a href="/registro-page">④ Registro</a></li>
   </ul>
 </nav>
 
 <div class="container">
   <div class="card">
-    <h1>Crea tu empresa desde cero</h1>
-    <p>JahirLandia te lleva paso a paso por todo el proceso de constitución legal de tu empresa en <strong>Baja California</strong>. Sin conocimientos legales previos.</p>
+    <div class="step-header">
+      <div class="step-num-big">1</div>
+      <div>
+        <div class="step-title">Crea tu empresa desde cero</div>
+        <div class="step-subtitle">Lazuli-KPI te guía paso a paso por el proceso de constitución legal en Baja California.</div>
+      </div>
+    </div>
 
     <div id="alert" class="alert"></div>
 
+    <!-- Nombre público de la empresa -->
     <div class="form-group">
-      <label for="nombre">Nombre de la empresa</label>
-      <input type="text" id="nombre" placeholder="Ej. Tacos El Borrego S.A." />
+      <label for="nombre">Nombre de la empresa <span style="font-weight:400;color:#6b7280">(nombre público)</span></label>
+      <input type="text" id="nombre" placeholder="Ej. Tacos El Borrego, Tech Innovaciones" autocomplete="off" />
+      <small>Solo el nombre comercial, sin incluir el tipo de sociedad. Mínimo 3 caracteres, solo letras, números y espacios.</small>
+      <span class="field-error" id="err-nombre"></span>
     </div>
+
+    <!-- Giro comercial (tipo de sociedad) -->
     <div class="form-group">
-      <label for="giro">Giro / Sector</label>
-      <select id="giro">
+      <label>Giro comercial <span style="font-weight:400;color:#6b7280">(tipo de sociedad)</span></label>
+      <input type="hidden" id="giro-comercial" />
+      <div class="giro-grid" id="giro-grid">
+        <div class="giro-card" data-val="S.A. de C.V.">S.A. de C.V.</div>
+        <div class="giro-card" data-val="S. de R.L. de C.V.">S. de R.L. de C.V.</div>
+        <div class="giro-card" data-val="S.A.S.">S.A.S.</div>
+        <div class="giro-card" data-val="S.C.">S.C.</div>
+        <div class="giro-card" data-val="A.C.">A.C.</div>
+        <div class="giro-card" data-val="Persona Física con Act. Empresarial">Persona Física</div>
+      </div>
+      <span class="field-error" id="err-giro"></span>
+
+      <!-- Definiciones desplegables -->
+      <details class="giro-defs">
+        <summary>¿Qué significa cada tipo de sociedad?</summary>
+        <div class="giro-def-list">
+          <div class="giro-def-item">
+            <strong>S.A. de C.V.</strong> — Sociedad Anónima de Capital Variable
+            <p>Ideal para medianas y grandes empresas con varios socios. El capital puede aumentar o disminuir sin modificar el acta constitutiva. Responsabilidad limitada al capital aportado.</p>
+          </div>
+          <div class="giro-def-item">
+            <strong>S. de R.L. de C.V.</strong> — Sociedad de Responsabilidad Limitada de Capital Variable
+            <p>Pensada para grupos pequeños de socios (máx. 50). Combina responsabilidad limitada con flexibilidad de capital variable. Común en empresas familiares o startups.</p>
+          </div>
+          <div class="giro-def-item">
+            <strong>S.A.S.</strong> — Sociedad por Acciones Simplificada
+            <p>Figura moderna y ágil, constituida 100 % en línea sin notario. Perfecta para emprendedores que comienzan solos o en pareja. Ingresos anuales máx. $5 millones de pesos.</p>
+          </div>
+          <div class="giro-def-item">
+            <strong>S.C.</strong> — Sociedad Civil
+            <p>Para profesionistas que prestan servicios en conjunto (médicos, abogados, arquitectos). Los socios responden con sus bienes personales según su participación.</p>
+          </div>
+          <div class="giro-def-item">
+            <strong>A.C.</strong> — Asociación Civil
+            <p>Sin fines de lucro. Los ingresos se destinan al objeto social (cultural, educativo, deportivo). No reparte utilidades entre sus miembros.</p>
+          </div>
+          <div class="giro-def-item">
+            <strong>Persona Física con Actividad Empresarial</strong>
+            <p>Tú eres la empresa. Sin separación legal entre tu patrimonio personal y el del negocio. Opción más sencilla para emprendedores individuales que inician.</p>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- Giro / Sector económico -->
+    <div class="form-group">
+      <label for="sector">Sector económico</label>
+      <select id="sector">
         <option value="">— Selecciona —</option>
         <option value="comercio">Comercio</option>
         <option value="manufactura">Manufactura</option>
@@ -45,45 +100,128 @@
         <option value="educacion">Educación</option>
         <option value="otro">Otro</option>
       </select>
-    </div>
-    <div class="form-group">
-      <label for="fundador">Nombre del fundador</label>
-      <input type="text" id="fundador" placeholder="Tu nombre completo" />
-    </div>
-    <div class="form-group">
-      <label for="curp_rfc">CURP o RFC <span style="font-weight:400;color:#6b7280">(opcional)</span></label>
-      <input type="text" id="curp_rfc" placeholder="XXXX000000XXXXXX00" />
+      <span class="field-error" id="err-sector"></span>
     </div>
 
-    <button class="btn btn-primary" id="btn-crear">Comenzar →</button>
+    <!-- Fundador -->
+    <div class="form-group">
+      <label for="fundador">Nombre del fundador</label>
+      <input type="text" id="fundador" placeholder="Tu nombre completo" autocomplete="name" />
+      <span class="field-error" id="err-fundador"></span>
+    </div>
+
+    <!-- CURP / RFC opcional -->
+    <div class="form-group">
+      <label for="curp_rfc">CURP o RFC <span style="font-weight:400;color:#6b7280">(opcional)</span></label>
+      <input type="text" id="curp_rfc" placeholder="XXXX000000XXXXXX00" autocomplete="off" />
+      <small>Si ya cuentas con él, agrégalo para autocompletar trámites más adelante.</small>
+      <span class="field-error" id="err-curp"></span>
+    </div>
+
+    <button class="btn btn-primary" id="btn-crear">Comenzar → Paso 2: Parámetros</button>
   </div>
 </div>
 
 <script src="/static/app.js"></script>
 <script>
+  // ── Giro comercial selection ──────────────────────────────
+  document.querySelectorAll(".giro-card").forEach(card => {
+    card.addEventListener("click", () => {
+      document.querySelectorAll(".giro-card").forEach(c => c.classList.remove("selected"));
+      card.classList.add("selected");
+      document.getElementById("giro-comercial").value = card.dataset.val;
+      document.getElementById("err-giro").textContent = "";
+    });
+  });
+
+  // ── Validation helpers ────────────────────────────────────
+  function setError(id, msg) {
+    document.getElementById(id).textContent = msg;
+  }
+  function clearErrors() {
+    ["err-nombre","err-giro","err-sector","err-fundador","err-curp"].forEach(id => {
+      document.getElementById(id).textContent = "";
+    });
+    hideAlert(document.getElementById("alert"));
+  }
+
+  function validarNombre(val) {
+    if (!val) return "El nombre de la empresa es obligatorio.";
+    if (val.length < 3) return "Debe tener al menos 3 caracteres.";
+    if (!/^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ0-9\s\-\.']+$/.test(val))
+      return "Solo se permiten letras, números, espacios y los caracteres - . '";
+    return "";
+  }
+
+  function validarFundador(val) {
+    if (!val) return "El nombre del fundador es obligatorio.";
+    if (val.length < 3) return "Debe tener al menos 3 caracteres.";
+    if (!/^[a-zA-ZáéíóúÁÉÍÓÚüÜñÑ\s\-\.]+$/.test(val))
+      return "Solo se permiten letras, espacios y los caracteres - .";
+    return "";
+  }
+
+  function validarCurpRfc(val) {
+    if (!val) return ""; // opcional
+    const cleanVal = val.toUpperCase().replace(/\s/g, "");
+    // CURP: 18 chars alfanumérico
+    const curpReg = /^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z\d]\d$/;
+    // RFC persona física: 13 chars, persona moral: 12 chars
+    const rfcFis  = /^[A-Z]{4}\d{6}[A-Z\d]{3}$/;
+    const rfcMor  = /^[A-Z]{3}\d{6}[A-Z\d]{3}$/;
+    if (!curpReg.test(cleanVal) && !rfcFis.test(cleanVal) && !rfcMor.test(cleanVal))
+      return "Formato no válido. Verifica tu CURP (18 chars) o RFC (12-13 chars).";
+    return "";
+  }
+
+  // ── Submit ────────────────────────────────────────────────
   document.getElementById("btn-crear").addEventListener("click", async () => {
-    const alert = document.getElementById("alert");
-    hideAlert(alert);
+    clearErrors();
+    const alertEl  = document.getElementById("alert");
 
-    const nombre   = document.getElementById("nombre").value.trim();
-    const giro     = document.getElementById("giro").value;
-    const fundador = document.getElementById("fundador").value.trim();
-    const curp_rfc = document.getElementById("curp_rfc").value.trim();
+    const nombre       = document.getElementById("nombre").value.trim();
+    const giroComercial = document.getElementById("giro-comercial").value;
+    const sector       = document.getElementById("sector").value;
+    const fundador     = document.getElementById("fundador").value.trim();
+    const curp_rfc     = document.getElementById("curp_rfc").value.trim();
 
-    if (!nombre || !giro || !fundador) {
-      showAlert(alert, "Por favor completa nombre, giro y fundador.");
+    let valid = true;
+
+    const errNombre = validarNombre(nombre);
+    if (errNombre) { setError("err-nombre", errNombre); valid = false; }
+
+    if (!giroComercial) { setError("err-giro", "Selecciona el tipo de sociedad."); valid = false; }
+
+    if (!sector) { setError("err-sector", "Selecciona el sector económico."); valid = false; }
+
+    const errFundador = validarFundador(fundador);
+    if (errFundador) { setError("err-fundador", errFundador); valid = false; }
+
+    const errCurp = validarCurpRfc(curp_rfc);
+    if (errCurp) { setError("err-curp", errCurp); valid = false; }
+
+    if (!valid) {
+      showAlert(alertEl, "Corrige los errores antes de continuar.");
       return;
     }
+
+    // Nombre completo con giro comercial = "Nombre S.A. de C.V."
+    const nombreCompleto = `${nombre} ${giroComercial}`;
 
     try {
       const empresa = await apiFetch("/empresa", {
         method: "POST",
-        body: JSON.stringify({ nombre, giro, fundador, curp_rfc }),
+        body: JSON.stringify({
+          nombre: nombreCompleto,
+          giro: sector,
+          fundador,
+          curp_rfc,
+        }),
       });
       setEmpresaId(empresa.empresa_id);
-      window.location.href = "/guia-page";
+      window.location.href = "/parametros-page";
     } catch (e) {
-      showAlert(alert, e.message);
+      showAlert(alertEl, e.message);
     }
   });
 </script>

@@ -3,35 +3,55 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JahirLandia — Evaluación</title>
+  <title>Lazuli-KPI — Evaluación</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
 
 <nav>
-  <span class="brand">🏢 JahirLandia</span>
+  <span class="brand">💎 Lazuli-KPI</span>
   <ul class="steps-nav">
-    <li><a href="/">Inicio</a></li>
-    <li><a href="/guia-page">Guía</a></li>
-    <li><a href="/parametros-page">Parámetros</a></li>
-    <li><a href="/evaluacion-page">Evaluación</a></li>
-    <li><a href="/registro-page">Registro</a></li>
+    <li><a href="/">① Inicio</a></li>
+    <li><a href="/parametros-page">② Parámetros</a></li>
+    <li><a href="/evaluacion-page" class="active">③ Evaluación</a></li>
+    <li><a href="/registro-page">④ Registro</a></li>
   </ul>
 </nav>
 
 <div class="container">
 
+  <!-- Barra de progreso del flujo -->
+  <div style="margin-bottom:1.5rem;">
+    <div style="display:flex;justify-content:space-between;font-size:.8rem;color:#6b7280;margin-bottom:.35rem;">
+      <span>Paso 3 de 4</span>
+      <span>75 %</span>
+    </div>
+    <div class="progress-bar-wrap" style="margin:0;">
+      <div class="progress-bar-fill" style="width:75%"></div>
+    </div>
+  </div>
+
   <!-- Panel inicial: botón para evaluar -->
   <div class="card" id="panel-inicio">
-    <h1>Evaluación de viabilidad</h1>
-    <p>Bob analizará los 7 parámetros de tu empresa y te dará una calificación. Necesitas <strong>60 puntos o más</strong> para continuar al registro.</p>
+    <div class="step-header">
+      <div class="step-num-big">3</div>
+      <div>
+        <div class="step-title">Evaluación de viabilidad</div>
+        <div class="step-subtitle">Lazuli-KPI analiza tus 7 parámetros y te da una calificación. Necesitas <strong>60 puntos o más</strong> para continuar.</div>
+      </div>
+    </div>
     <div id="alert-inicio" class="alert"></div>
     <button class="btn btn-primary" id="btn-evaluar">Evaluar mi empresa →</button>
   </div>
 
   <!-- Resultado (oculto hasta evaluar) -->
   <div class="card" id="panel-resultado" style="display:none;">
-    <h1>Resultado de la evaluación</h1>
+    <div class="step-header">
+      <div class="step-num-big">3</div>
+      <div>
+        <div class="step-title">Resultado de la evaluación</div>
+      </div>
+    </div>
 
     <div id="score-circle" class="score-circle">
       <span class="score-num" id="score-num">—</span>
@@ -44,7 +64,7 @@
     <h2>Detalle por parámetro</h2>
     <table id="tabla-detalle" style="width:100%;border-collapse:collapse;font-size:.88rem;margin-bottom:1.5rem;">
       <thead>
-        <tr style="background:#f9fafb;border-bottom:1px solid #e5e7eb;">
+        <tr style="background:#f0f7ff;border-bottom:1px solid #bfdbfe;">
           <th style="text-align:left;padding:.5rem .75rem;">Parámetro</th>
           <th style="text-align:right;padding:.5rem .75rem;">Obtenido</th>
           <th style="text-align:right;padding:.5rem .75rem;">Máximo</th>
@@ -53,19 +73,19 @@
       <tbody id="detalle-body"></tbody>
     </table>
 
-    <!-- Feedback de Bob (solo si reprueba) -->
+    <!-- Feedback (solo si reprueba) -->
     <div id="feedback-wrap" style="display:none;">
-      <h2 style="margin-bottom:.75rem;">💬 Recomendaciones de Bob</h2>
+      <h2 style="margin-bottom:.75rem;">💬 Recomendaciones</h2>
       <div class="feedback-box" id="feedback-texto"></div>
       <div style="margin-top:1.25rem;display:flex;gap:1rem;">
-        <a href="/parametros-page" class="btn btn-outline">Mejorar parámetros</a>
+        <a href="/parametros-page" class="btn btn-outline">← Mejorar parámetros</a>
         <button class="btn btn-primary" id="btn-reevaluar">Volver a evaluar</button>
       </div>
     </div>
 
     <!-- Botón continuar (solo si aprueba) -->
     <div id="continuar-wrap" style="display:none;">
-      <a href="/registro-page" class="btn btn-success">Continuar al registro →</a>
+      <a href="/registro-page" class="btn btn-success">Continuar → Paso 4: Registro</a>
     </div>
   </div>
 
@@ -74,6 +94,8 @@
 <script src="/static/app.js"></script>
 <script>
   const empresaId = getEmpresaId();
+
+  if (!empresaId) window.location.href = "/";
 
   document.getElementById("btn-evaluar").addEventListener("click", evaluar);
   document.getElementById("btn-reevaluar")?.addEventListener("click", () => {
@@ -84,11 +106,6 @@
   async function evaluar() {
     const alertEl = document.getElementById("alert-inicio");
     hideAlert(alertEl);
-
-    if (!empresaId) {
-      showAlert(alertEl, "Primero crea tu empresa en la página de inicio.");
-      return;
-    }
 
     const btn = document.getElementById("btn-evaluar");
     btn.disabled = true;
@@ -120,19 +137,17 @@
       : "❌ No aprobado. Revisa las recomendaciones.";
     veredicto.style.color = r.aprobado ? "#15803d" : "#b91c1c";
 
-    // Tabla de detalle
     const tbody = document.getElementById("detalle-body");
     tbody.innerHTML = Object.entries(r.detalle_puntajes).map(([nombre, d]) => {
       const pct = d.puntaje_obtenido / d.puntaje_maximo;
       const color = pct >= 0.8 ? "#15803d" : pct >= 0.5 ? "#b45309" : "#b91c1c";
-      return `<tr style="border-bottom:1px solid #f3f4f6;">
+      return `<tr style="border-bottom:1px solid #f0f7ff;">
         <td style="padding:.5rem .75rem;">${nombre.replace(/_/g,' ')}</td>
         <td style="text-align:right;padding:.5rem .75rem;color:${color};font-weight:600;">${d.puntaje_obtenido}</td>
         <td style="text-align:right;padding:.5rem .75rem;color:#6b7280;">${d.puntaje_maximo}</td>
       </tr>`;
     }).join('');
 
-    // Feedback o botón continuar
     if (!r.aprobado && r.feedback) {
       document.getElementById("feedback-texto").textContent = r.feedback;
       document.getElementById("feedback-wrap").style.display = "block";
