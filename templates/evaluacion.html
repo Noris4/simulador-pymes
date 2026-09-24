@@ -37,7 +37,7 @@
       <div class="step-num-big">3</div>
       <div>
         <div class="step-title">Evaluación de viabilidad</div>
-        <div class="step-subtitle">Lazuli-KPI analiza tus 7 parámetros y te da una calificación. Necesitas <strong>60 puntos o más</strong> para continuar.</div>
+        <div class="step-subtitle">Lazuli-KPI analiza tus 7 parámetros y te da una calificación. Necesitas <strong>80 puntos o más</strong> para continuar.</div>
       </div>
     </div>
     <div id="alert-inicio" class="alert"></div>
@@ -136,6 +136,9 @@
       ? "✅ ¡Aprobado! Tu empresa es viable."
       : "❌ No aprobado. Revisa las recomendaciones.";
     veredicto.style.color = r.aprobado ? "#15803d" : "#b91c1c";
+
+    // Guardar resultado en sessionStorage para que parametros.html pueda destacar los campos
+    sessionStorage.setItem("ultima_evaluacion", JSON.stringify(r.detalle_puntajes));
 
     const tbody = document.getElementById("detalle-body");
     tbody.innerHTML = Object.entries(r.detalle_puntajes).map(([nombre, d]) => {

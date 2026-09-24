@@ -29,7 +29,7 @@ PESOS: dict[str, float] = {
 }
 
 # TODO: Ajustar calificación mínima aprobatoria según empresa_baja_california.docx
-CALIFICACION_MINIMA: float = 60.0
+CALIFICACION_MINIMA: float = 80.0
 
 # Almacén de historial: { empresa_id: [lista de evaluaciones] }
 _historial: dict[str, list] = {}

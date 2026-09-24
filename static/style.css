@@ -309,6 +309,41 @@ nav .steps-nav a.active + .step-badge { background: var(--blue-600); color: #fff
   color: #374151;
 }
 
+/* ── Parameter evaluation highlights ─────────────────────── */
+.param-urgente label {
+  color: #b91c1c !important;
+}
+.param-urgente label::after {
+  content: " ⚠ urgente";
+  font-size: .75rem;
+  font-weight: 700;
+  color: #b91c1c;
+  margin-left: .4rem;
+}
+.param-urgente input,
+.param-urgente select,
+.param-urgente textarea {
+  border-color: #fca5a5 !important;
+  background: #fff5f5 !important;
+}
+
+.param-mejorar label {
+  color: #15803d !important;
+}
+.param-mejorar label::after {
+  content: " ✓ puede mejorar";
+  font-size: .75rem;
+  font-weight: 700;
+  color: #15803d;
+  margin-left: .4rem;
+}
+.param-mejorar input,
+.param-mejorar select,
+.param-mejorar textarea {
+  border-color: #86efac !important;
+  background: #f0fdf4 !important;
+}
+
 /* ── Inline checklist ─────────────────────────────────────── */
 .checklist { list-style: none; }
 .checklist li {

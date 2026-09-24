@@ -42,13 +42,13 @@
 
     <div id="alert" class="alert"></div>
 
-    <div class="form-group">
+    <div class="form-group" id="fg-capital">
       <label for="capital">Capital inicial (MXN)</label>
       <input type="number" id="capital" placeholder="Ej. 50000" min="0" />
       <small>Monto en pesos mexicanos que aportarás al iniciar.</small>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" id="fg-giro">
       <label for="giro">Sector (se pre-llenará desde el inicio)</label>
       <select id="giro">
         <option value="">— Selecciona —</option>
@@ -65,30 +65,30 @@
       </select>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" id="fg-empleados">
       <label for="empleados">Número de empleados</label>
       <input type="number" id="empleados" placeholder="Ej. 3" min="0" />
     </div>
 
-    <div class="form-group">
+    <div class="form-group" id="fg-plan-ventas">
       <label for="plan-ventas">Plan de ventas</label>
       <textarea id="plan-ventas" placeholder="Describe tu estrategia de ventas: ¿a quién le vendes, cómo y cuánto esperas vender?"></textarea>
       <small>Mínimo 50 caracteres. Más detalle = mayor puntaje.</small>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" id="fg-plan-financiero">
       <label for="plan-financiero">Plan financiero</label>
       <textarea id="plan-financiero" placeholder="Describe tus proyecciones de ingresos, gastos y punto de equilibrio."></textarea>
       <small>Mínimo 50 caracteres.</small>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" id="fg-analisis">
       <label for="analisis">Análisis de mercado</label>
       <textarea id="analisis" placeholder="¿Quiénes son tus competidores? ¿Cuál es tu mercado objetivo en Baja California?"></textarea>
       <small>Mínimo 50 caracteres.</small>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" id="fg-registro-legal">
       <label>
         <input type="checkbox" id="registro-legal" style="margin-right:.5rem;" />
         Ya tengo o estoy tramitando mi CURP y RFC
@@ -161,6 +161,39 @@
   });
 
   precargar();
+
+  /* Resaltar campos según la última evaluación guardada */
+  (function aplicarDestacados() {
+    const raw = sessionStorage.getItem("ultima_evaluacion");
+    if (!raw) return;
+    let detalle;
+    try { detalle = JSON.parse(raw); } catch (_) { return; }
+
+    // Mapa de nombre_parametro → id del form-group
+    const mapa = {
+      capital_inicial:  "fg-capital",
+      giro_sector:      "fg-giro",
+      num_empleados:    "fg-empleados",
+      plan_ventas:      "fg-plan-ventas",
+      plan_financiero:  "fg-plan-financiero",
+      analisis_mercado: "fg-analisis",
+      registro_legal:   "fg-registro-legal",
+    };
+
+    Object.entries(detalle).forEach(([nombre, d]) => {
+      const fgId = mapa[nombre];
+      if (!fgId) return;
+      const fg = document.getElementById(fgId);
+      if (!fg) return;
+      const pct = d.puntaje_maximo > 0 ? d.puntaje_obtenido / d.puntaje_maximo : 1;
+      fg.classList.remove("param-urgente", "param-mejorar");
+      if (pct < 0.50) {
+        fg.classList.add("param-urgente");
+      } else if (pct <= 0.80) {
+        fg.classList.add("param-mejorar");
+      }
+    });
+  })();
 </script>
 </body>
 </html>
