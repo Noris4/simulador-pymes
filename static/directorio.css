@@ -1,0 +1,47 @@
+nav {height:auto;min-height:56px;gap:.75rem;flex-wrap:wrap;padding-top:.6rem;padding-bottom:.6rem;}
+nav .steps-nav {flex-wrap:wrap;}
+.directorio-container {max-width:1180px;margin:2.5rem auto;padding:0 1.25rem;}
+.directorio-hero {display:flex;justify-content:space-between;align-items:center;gap:1.5rem;padding:2rem 0;}
+.directorio-eyebrow {font-size:.72rem;font-weight:700;letter-spacing:.12em;color:#2563eb;margin-bottom:.6rem;}
+.directorio-hero h1 {font-size:clamp(1.8rem,4vw,2.8rem);line-height:1.15;color:#173b65;margin-bottom:1rem;max-width:650px;}
+.directorio-hero p:last-child {color:#52677d;max-width:620px;}
+.directorio-sello {border:1px solid #abc8ee;color:#245293;background:#e3efff;padding:.5rem .9rem;border-radius:30px;white-space:nowrap;font-size:.8rem;}
+.directorio-aviso {background:#fff9e9;border:1px solid #efdb9d;color:#66511e;border-radius:10px;padding:1rem 1.2rem;font-size:.85rem;}
+.directorio-estadisticas {display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:1.5rem 0;}
+.directorio-estadisticas div {background:white;border:1px solid #c9dcf6;border-radius:12px;padding:1.1rem 1.3rem;}
+.directorio-estadisticas strong {display:block;font-size:1.8rem;color:#1d4ed8;}
+.directorio-estadisticas span {font-size:.8rem;color:#52677d;}
+.directorio-perfil {padding:1.2rem;background:#fff;border:1px solid #c9dcf6;border-radius:12px;margin:1.5rem 0;}
+.directorio-perfil summary {cursor:pointer;color:#1d4ed8;font-weight:650;}
+.directorio-perfil p {margin:1rem 0;font-size:.85rem;}
+.directorio-perfil textarea {width:100%;padding:.7rem;border:1px solid #bfdbfe;border-radius:7px;font:inherit;resize:vertical;}
+.directorio-opciones {display:flex;flex-wrap:wrap;gap:1.5rem;margin:1rem 0;}
+.directorio-opciones label {display:flex;align-items:center;gap:.5rem;font-size:.88rem;}
+.directorio-filtros {display:grid;grid-template-columns:1.5fr 1fr 1.2fr 1.2fr auto;align-items:end;gap:.8rem;background:#fff;padding:1.1rem;border:1px solid #c9dcf6;border-radius:12px;}
+.directorio-filtros label {display:block;font-size:.76rem;font-weight:650;margin-bottom:.35rem;}
+.directorio-filtros input,.directorio-filtros select {width:100%;min-height:42px;border:1px solid #bfd1e8;padding:.55rem;border-radius:6px;font:inherit;font-size:.83rem;background:#fff;}
+.directorio-resultados {display:flex;justify-content:space-between;align-items:center;margin:1.7rem 0 1rem;gap:1rem;}
+.directorio-resultados h2 {font-size:1.1rem;}
+.directorio-resultados a {font-size:.82rem;}
+.directorio-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.25rem;}
+.empresa-tarjeta {background:#fff;border:1px solid #c9dcf6;border-radius:14px;overflow:hidden;transition:transform .18s,box-shadow .18s;}
+.empresa-tarjeta:hover {transform:translateY(-3px);box-shadow:0 10px 28px #214d7e12;}
+.empresa-imagen {position:relative;background:#e0edff;}
+.empresa-imagen img {display:block;width:100%;height:160px;object-fit:cover;}
+.empresa-tipo {position:absolute;top:12px;left:12px;background:#fff5dc;color:#75520d;border:1px solid #efd497;border-radius:20px;padding:.25rem .6rem;font-size:.67rem;font-weight:700;}
+.empresa-real {background:#e4f7ec;color:#17613a;border-color:#95d5b0;}
+.empresa-cuerpo {padding:1.2rem;}
+.empresa-giro {font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;font-weight:700;color:#2563eb;}
+.empresa-cuerpo h3 {font-size:1.2rem;color:#183954;margin:.3rem 0 .55rem;overflow-wrap:anywhere;}
+.empresa-descripcion {font-size:.85rem;color:#52677d;min-height:3.2rem;overflow-wrap:anywhere;}
+.empresa-datos {display:flex;flex-wrap:wrap;justify-content:space-between;gap:.5rem;font-size:.8rem;border-top:1px solid #e6eef9;border-bottom:1px solid #e6eef9;padding:.8rem 0;margin:.9rem 0;}
+.empresa-datos small {display:block;color:#6c7e91;}
+.empresa-necesidades {list-style:none;display:grid;gap:.45rem;font-size:.8rem;}
+.empresa-necesidades li {display:flex;gap:.5rem;align-items:center;}
+.empresa-necesidades strong {margin-left:auto;font-size:.7rem;font-weight:600;}
+.solicita {color:#146344;}.no-solicita {color:#718096;}
+.directorio-vacio {grid-column:1/-1;text-align:center;padding:3rem;background:white;border:1px dashed #adc7e9;border-radius:12px;}
+.directorio-vacio p {margin:.7rem 0 1.2rem;}
+.directorio-pie {font-size:.8rem;color:#5e7289;margin:2rem 0;}
+@media(max-width:1000px) {.directorio-filtros{grid-template-columns:repeat(2,minmax(0,1fr));}.directorio-grid{grid-template-columns:repeat(2,minmax(0,1fr));}}
+@media(max-width:620px) {.directorio-grid,.directorio-estadisticas,.directorio-filtros{grid-template-columns:1fr;}.directorio-hero{align-items:flex-start;flex-direction:column;padding-top:.5rem;}.directorio-container{margin-top:1.2rem;}.directorio-estadisticas div{display:flex;align-items:center;gap:1rem;}}

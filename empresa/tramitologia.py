@@ -7,7 +7,7 @@ específicos para Baja California según el sector del negocio.
 """
 
 from empresa import parametros as mod_parametros
-from empresa.evaluacion import _obtener_token_iam, _WATSONX_BASE_URL, _WATSONX_MODEL, _WATSONX_PROJECT_ID
+from empresa.watsonx import llamar_chat, ErrorWatsonx
 
 # Almacén en memoria: { empresa_id: str (resultado) }
 _cache_tramitologia: dict[str, str] = {}
@@ -38,6 +38,10 @@ def generar_tramitologia(empresa_id: str) -> dict:
       - error (str, solo si hubo un problema)
     """
     params = mod_parametros.obtener_parametros(empresa_id)
+    from empresa.evaluacion import acceso_aprobado
+    permitido, motivo = acceso_aprobado(empresa_id)
+    if not permitido:
+        return {"error": motivo}
     if params is None:
         return {"error": "Los parámetros de la empresa no han sido registrados."}
 
@@ -48,15 +52,16 @@ def generar_tramitologia(empresa_id: str) -> dict:
     if empresa_id in _cache_tramitologia:
         return {"giro": giro, "tramitologia": _cache_tramitologia[empresa_id]}
 
-    texto = _generar_con_llm(giro, contexto)
+    try:
+        texto = _generar_con_llm(giro, contexto)
+    except ErrorWatsonx as exc:
+        return {"error": str(exc)}
     _cache_tramitologia[empresa_id] = texto
     return {"giro": giro, "tramitologia": texto}
 
 
 def _generar_con_llm(giro: str, contexto: str) -> str:
     """Llama al LLM y retorna el análisis de tramitología estructurado."""
-    import urllib.request
-    import json
 
     prompt = (
         f"Eres un experto en trámites empresariales de Baja California, México.\n"
@@ -78,29 +83,4 @@ def _generar_con_llm(giro: str, contexto: str) -> str:
         "Solo texto plano en el resumen y el separador | en los trámites."
     )
 
-    try:
-        token = _obtener_token_iam()
-        url = f"{_WATSONX_BASE_URL}/ml/v1/text/generation?version=2023-05-29"
-        payload = json.dumps({
-            "model_id": _WATSONX_MODEL,
-            "project_id": _WATSONX_PROJECT_ID,
-            "input": prompt,
-            "parameters": {
-                "max_new_tokens": 900,
-                "temperature": 0.4,
-            },
-        }).encode("utf-8")
-        req = urllib.request.Request(
-            url,
-            data=payload,
-            headers={
-                "Content-Type": "application/json",
-                "Authorization": f"Bearer {token}",
-            },
-            method="POST",
-        )
-        with urllib.request.urlopen(req, timeout=40) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            return data["results"][0]["generated_text"].strip()
-    except Exception as exc:
-        return f"[Error al generar tramitología: {exc}]"
+    return llamar_chat("Ofrece orientación general, no asesoría legal verificada. Indica que los costos y requisitos deben confirmarse ante la autoridad.", prompt, max_tokens=2000)

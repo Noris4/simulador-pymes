@@ -644,3 +644,7 @@ nav .steps-nav a.active + .step-badge { background: var(--blue-600); color: #fff
   background: #16a34a;
   border-color: #16a34a;
 }
+
+/* Navegación del flujo de seis pasos. */
+nav {height:auto;min-height:56px;gap:.5rem;flex-wrap:wrap;padding-top:.5rem;padding-bottom:.5rem;}
+nav .steps-nav {flex-wrap:wrap;}

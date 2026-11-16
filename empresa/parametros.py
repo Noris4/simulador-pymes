@@ -4,6 +4,8 @@ Captura y validación de los 7 parámetros evaluables de la empresa.
 Persistencia: diccionario en memoria (intercambiable por BD en el futuro).
 """
 
+import math
+
 # Almacén en memoria: { empresa_id: dict }
 _parametros: dict[str, dict] = {}
 
@@ -28,26 +30,28 @@ def validar_parametros(datos: dict) -> list[str]:
     Retorna una lista de mensajes de error; lista vacía si todo es válido.
     """
     errores = []
+    if not isinstance(datos, dict):
+        return ["Se esperaba un objeto con los parámetros."]
 
     # 1. capital_inicial
     capital = datos.get("capital_inicial")
     if capital is None:
         errores.append("capital_inicial es requerido.")
-    elif not isinstance(capital, (int, float)) or capital < 0:
+    elif type(capital) not in (int, float) or not math.isfinite(capital) or capital < 0:
         errores.append("capital_inicial debe ser un número positivo (en MXN).")
 
     # 2. giro_sector
     giro = datos.get("giro_sector")
     if giro is None:
         errores.append("giro_sector es requerido.")
-    elif giro not in GIROS_VALIDOS:
+    elif not isinstance(giro, str) or giro not in GIROS_VALIDOS:
         errores.append(f"giro_sector debe ser uno de: {', '.join(GIROS_VALIDOS)}.")
 
     # 3. num_empleados
     empleados = datos.get("num_empleados")
     if empleados is None:
         errores.append("num_empleados es requerido.")
-    elif not isinstance(empleados, int) or empleados < 0:
+    elif type(empleados) is not int or empleados < 0:
         errores.append("num_empleados debe ser un entero positivo.")
 
     # 4. plan_ventas
@@ -78,6 +82,9 @@ def validar_parametros(datos: dict) -> list[str]:
     elif not isinstance(registro, bool):
         errores.append("registro_legal debe ser un booleano (true o false).")
 
+    for nombre in ("plan_ventas", "plan_financiero", "analisis_mercado"):
+        if isinstance(datos.get(nombre), str) and len(datos[nombre]) > 12000:
+            errores.append(f"{nombre} no puede superar 12000 caracteres.")
     return errores
 
 
@@ -87,6 +94,11 @@ def guardar_parametros(empresa_id: str, datos: dict) -> dict:
     Sobreescribe cualquier valor previo.
     Retorna los parámetros guardados.
     """
+    # Un cambio de parámetros invalida las evaluaciones y la orientación anteriores.
+    from empresa import evaluacion, tramitologia, registro
+    evaluacion._historial.pop(empresa_id, None)
+    tramitologia._cache_tramitologia.pop(empresa_id, None)
+    registro._registros.pop(empresa_id, None)
     _parametros[empresa_id] = {
         "empresa_id": empresa_id,
         "capital_inicial": datos["capital_inicial"],

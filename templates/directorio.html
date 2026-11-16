@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lazuli-KPI — Empresas aprobadas</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/directorio.css">
+</head>
+<body>
+<nav>
+  <span class="brand">💎 Lazuli-KPI</span>
+  <ul class="steps-nav">
+    <li><a href="/">① Inicio</a></li>
+    <li><a href="/parametros-page">② Parámetros</a></li>
+    <li><a href="/evaluacion-page">③ Evaluación</a></li>
+    <li><a href="/tramitologia-page">④ Tramitología</a></li>
+    <li><a href="/registro-page">⑤ Conclusión</a></li>
+    <li><a href="/directorio-page" class="active">⑥ Empresas</a></li>
+  </ul>
+</nav>
+<main class="directorio-container">
+  <header class="directorio-hero">
+    <div>
+      <p class="directorio-eyebrow">PASO 6 DE 6 · COMUNIDAD LAZULI</p>
+      <h1>Empresas con ideas para crecer.</h1>
+      <p>Explora negocios de distintos giros y descubre quién busca capital, socios o talento.</p>
+    </div>
+    <span class="directorio-sello">Directorio de prueba</span>
+  </header>
+  <aside class="directorio-aviso">Las tarjetas con etiqueta <strong>“Ejemplo ficticio”</strong> tienen datos y calificaciones simulados; no pasaron una evaluación real. Las demás corresponden a aprobaciones vigentes de este programa. No se ofrecen inversiones ni vacantes verificadas.</aside>
+  <section class="directorio-estadisticas" aria-label="Resumen del directorio">
+    <div><strong>{{ total_evaluadas }}</strong><span>Empresas evaluadas y aprobadas</span></div>
+    <div><strong>{{ total_ejemplos }}</strong><span>Ejemplos ficticios para explorar</span></div>
+    <div><strong>{{ total_giros }}</strong><span>Giros representados</span></div>
+  </section>
+
+  {% if puede_editar %}
+  <details class="directorio-perfil" {% if editar %}open{% endif %}>
+    <summary>Editar la tarjeta y oportunidades de mi empresa</summary>
+    <p>Tu empresa aprobada aparece automáticamente. Indica qué oportunidades quieres mostrar. No publiques datos personales en la descripción.</p>
+    <form id="form-oportunidades">
+      <label for="descripcion-directorio">Descripción breve</label>
+      <textarea id="descripcion-directorio" minlength="10" maxlength="400" required rows="3">{{ oportunidades.get('descripcion', 'Empresa con evaluación vigente aprobada en este programa.') }}</textarea>
+      <div class="directorio-opciones">
+        <label><input type="checkbox" id="busca-financiamiento" {% if oportunidades.get('financiamiento') %}checked{% endif %}> Busca financiamiento</label>
+        <label><input type="checkbox" id="busca-inversion" {% if oportunidades.get('inversion') %}checked{% endif %}> Busca inversión</label>
+        <label><input type="checkbox" id="busca-empleados" {% if oportunidades.get('empleados') %}checked{% endif %}> Busca empleados</label>
+      </div>
+      <button class="btn btn-primary" type="submit">Guardar mi tarjeta</button>
+      <p id="mensaje-oportunidades" role="status" aria-live="polite"></p>
+    </form>
+  </details>
+  {% else %}
+  <aside class="directorio-perfil">Puedes explorar el directorio libremente. Para que tu empresa aparezca y editar sus oportunidades, primero debes <a href="/evaluacion-page">aprobar la evaluación</a>.</aside>
+  {% endif %}
+
+  <form class="directorio-filtros" method="get" action="/directorio-page" role="search">
+    <div><label for="busqueda">Buscar empresa</label><input id="busqueda" name="q" type="search" value="{{ filtros.q }}" placeholder="Nombre, giro o actividad"></div>
+    <div><label for="filtro-giro">Giro comercial</label><select id="filtro-giro" name="giro"><option value="">Todos los giros</option>{% for clave, nombre in giros.items() %}<option value="{{ clave }}" {% if filtros.giro == clave %}selected{% endif %}>{{ nombre }}</option>{% endfor %}</select></div>
+    <div><label for="filtro-necesidad">Oportunidad</label><select id="filtro-necesidad" name="necesidad"><option value="">Todas las oportunidades</option><option value="financiamiento" {% if filtros.necesidad == 'financiamiento' %}selected{% endif %}>Busca financiamiento</option><option value="inversion" {% if filtros.necesidad == 'inversion' %}selected{% endif %}>Busca inversión</option><option value="empleados" {% if filtros.necesidad == 'empleados' %}selected{% endif %}>Busca empleados</option></select></div>
+    <div><label for="filtro-origen">Tipo de tarjeta</label><select id="filtro-origen" name="origen"><option value="">Evaluadas y ejemplos</option><option value="evaluadas" {% if filtros.origen == 'evaluadas' %}selected{% endif %}>Solo evaluadas</option><option value="ejemplos" {% if filtros.origen == 'ejemplos' %}selected{% endif %}>Solo ejemplos ficticios</option></select></div>
+    <button class="btn btn-primary" type="submit">Filtrar</button>
+  </form>
+  <div class="directorio-resultados"><h2>{{ empresas|length }} empresas para explorar</h2><a href="/directorio-page">Limpiar filtros</a></div>
+  <section class="directorio-grid" aria-label="Empresas del directorio">
+    {% for empresa in empresas %}
+    <article class="empresa-tarjeta">
+      <div class="empresa-imagen giro-{{ empresa.giro }}">
+        <img src="/static/empresas/{{ empresa.giro if empresa.giro in giros else 'otro' }}.svg" alt="Ilustración de {{ giros.get(empresa.giro, 'empresa') }}" width="400" height="180" loading="lazy">
+        <span class="empresa-tipo {% if not empresa.es_ejemplo %}empresa-real{% endif %}">{{ 'Ejemplo ficticio' if empresa.es_ejemplo else 'Evaluación aprobada' }}</span>
+      </div>
+      <div class="empresa-cuerpo">
+        <p class="empresa-giro">{{ giros.get(empresa.giro, 'Otro') }}</p>
+        <h3>{{ empresa.nombre }}</h3>
+        <p class="empresa-descripcion">{{ empresa.descripcion }}</p>
+        <div class="empresa-datos"><span><strong>{{ empresa.num_empleados }}</strong> empleados</span><span><strong>{{ empresa.calificacion }}</strong>/100 <small>{{ 'simulado' if empresa.es_ejemplo else 'en el programa' }}</small></span></div>
+        <ul class="empresa-necesidades">
+          {% for clave, nombre in necesidades.items() %}
+          <li class="{{ 'solicita' if empresa[clave] else 'no-solicita' }}"><span>{{ '●' if empresa[clave] else '○' }}</span> {{ nombre }} <strong>{{ 'Busca' if empresa[clave] else 'No solicita' }}</strong></li>
+          {% endfor %}
+        </ul>
+      </div>
+    </article>
+    {% else %}
+    <div class="directorio-vacio"><h3>No hay empresas con estos filtros.</h3><p>Prueba otro giro o elimina los filtros para seguir explorando.</p><a class="btn btn-outline" href="/directorio-page">Ver todas las empresas</a></div>
+    {% endfor %}
+  </section>
+  <footer class="directorio-pie">Prototipo local: las empresas evaluadas y sus oportunidades se conservan únicamente mientras el servidor siga en ejecución. Cambiar los parámetros o dejar de aprobar retira la tarjeta del directorio.</footer>
+</main>
+<script src="/static/app.js"></script>
+<script src="/static/directorio.js"></script>
+</body>
+</html>

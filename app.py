@@ -1,10 +1,37 @@
+from pathlib import Path
 from dotenv import load_dotenv
-load_dotenv(encoding="utf-8-sig")
+load_dotenv(Path(__file__).resolve().parent / ".env", encoding="utf-8-sig")
 
-from flask import Flask, jsonify, request, render_template
+import os
+import secrets
+from flask import Flask, jsonify, request, render_template, session, redirect, url_for
 from empresa import perfil, guia, parametros, evaluacion, registro, tramitologia
+from empresa import directorio
 
 app = Flask(__name__)
+app.secret_key = os.getenv("FLASK_SECRET_KEY") or secrets.token_hex(32)
+app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax")
+
+
+@app.before_request
+def proteger_pasos_avanzados():
+    paginas = {"tramitologia_page", "registro_page"}
+    endpoints = {"route_tramitologia", "route_documento_registro", "route_confirmar_registro", "route_estado_registro", "route_guardar_oportunidades"}
+    es_pagina = request.endpoint in paginas
+    paso = (request.view_args or {}).get("paso_id", 0)
+    es_api = request.endpoint in endpoints or (request.endpoint == "route_marcar_paso_completado" and paso >= 4)
+    if not es_pagina and not es_api:
+        return None
+    activa = session.get("empresa_id")
+    empresa_id = activa if es_pagina or request.endpoint == "route_guardar_oportunidades" else (request.view_args or {}).get("empresa_id")
+    if not activa or empresa_id != activa:
+        permitido, motivo = False, "Crea una empresa en esta sesión y aprueba su evaluación rigurosa."
+    else:
+        permitido, motivo = evaluacion.acceso_aprobado(empresa_id)
+    if not permitido:
+        if es_pagina:
+            return redirect(url_for("evaluacion_page", bloqueo="evaluacion"))
+        return jsonify({"error": motivo, "estado": "bloqueado"}), 403
 
 
 # ── Páginas HTML ─────────────────────────────────────────────────────────────
@@ -30,12 +57,38 @@ def registro_page():
     return render_template("registro.html")
 
 
+@app.route("/directorio-page")
+def directorio_page():
+    empresas = directorio.listar_empresas()
+    filtros = {"q": request.args.get("q", "")[:200], "giro": request.args.get("giro", ""),
+               "necesidad": request.args.get("necesidad", ""), "origen": request.args.get("origen", "")}
+    filtradas = directorio.filtrar_empresas(empresas, filtros["q"], filtros["giro"], filtros["necesidad"], filtros["origen"])
+    empresa_id = session.get("empresa_id")
+    activa = perfil.obtener_empresa(empresa_id) or {}
+    puede_editar, _ = evaluacion.acceso_aprobado(empresa_id)
+    return render_template("directorio.html", empresas=filtradas, filtros=filtros,
+                           total_evaluadas=sum(not e["es_ejemplo"] for e in empresas),
+                           total_ejemplos=sum(e["es_ejemplo"] for e in empresas),
+                           total_giros=len({e["giro"] for e in empresas}),
+                           giros=directorio.GIROS, necesidades=directorio.NECESIDADES,
+                           oportunidades=activa.get("oportunidades_directorio", {}),
+                           puede_editar=puede_editar,
+                           editar=request.args.get("editar") == "1" or request.args.get("guardado") == "1")
+
+
+@app.route("/empresa/activa/oportunidades", methods=["PUT"])
+def route_guardar_oportunidades():
+    resultado = directorio.guardar_oportunidades(session["empresa_id"], request.get_json(force=True))
+    return jsonify(resultado), 400 if "error" in resultado else 200
+
+
 # ── Perfil ──────────────────────────────────────────────────────────────────
 
 @app.route("/empresa", methods=["POST"])
 def route_crear_empresa():
     datos = request.get_json(force=True)
     resultado = perfil.crear_empresa(datos)
+    session["empresa_id"] = resultado["empresa_id"]
     return jsonify(resultado), 201
 
 
@@ -103,6 +156,20 @@ def route_obtener_parametros(empresa_id):
 
 
 # ── Evaluación ───────────────────────────────────────────────────────────────
+
+@app.route("/empresa/<empresa_id>/acceso", methods=["GET"])
+def route_acceso(empresa_id):
+    if session.get("empresa_id") != empresa_id:
+        return jsonify({"permitido": False, "motivo": "Primero crea una empresa en esta sesión."})
+    permitido, motivo = evaluacion.acceso_aprobado(empresa_id)
+    return jsonify({"permitido": permitido, "motivo": motivo})
+
+
+@app.route("/sesion/acceso", methods=["GET"])
+def route_acceso_sesion():
+    empresa_id = session.get("empresa_id")
+    permitido, motivo = evaluacion.acceso_aprobado(empresa_id)
+    return jsonify({"permitido": permitido, "motivo": motivo})
 
 @app.route("/empresa/<empresa_id>/evaluar", methods=["POST"])
 def route_evaluar_empresa(empresa_id):

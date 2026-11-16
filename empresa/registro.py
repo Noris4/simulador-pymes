@@ -37,6 +37,9 @@ def verificar_elegibilidad_registro(empresa_id: str) -> tuple[bool, str]:
         return False, "La empresa aún no ha sido evaluada."
 
     ultima_evaluacion = historial[-1]
+    permitido, motivo = mod_evaluacion.acceso_aprobado(empresa_id)
+    if not permitido:
+        return False, motivo
     if not ultima_evaluacion.get("aprobado", False):
         calificacion = ultima_evaluacion.get("calificacion", 0)
         return (

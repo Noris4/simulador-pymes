@@ -15,7 +15,23 @@ document.addEventListener("DOMContentLoaded", () => {
   document.querySelectorAll("nav .steps-nav a").forEach(a => {
     if (a.getAttribute("href") === path) a.classList.add("active");
   });
+  window.actualizarAccesoPasos(false);
+    apiFetch('/sesion/acceso')
+      .then(r => window.actualizarAccesoPasos(r.permitido))
+      .catch(() => window.actualizarAccesoPasos(false));
 });
+
+window.actualizarAccesoPasos = (permitido) => {
+  document.querySelectorAll('nav .steps-nav a').forEach(a => {
+    const destino = a.dataset.destino || a.getAttribute('href');
+    if (!['/tramitologia-page', '/registro-page'].includes(destino)) return;
+    a.dataset.destino = destino;
+    a.setAttribute('href', permitido ? destino : '/evaluacion-page?bloqueo=evaluacion');
+    a.setAttribute('aria-disabled', String(!permitido));
+    a.title = permitido ? 'Evaluación rigurosa aprobada' : 'Bloqueado: primero aprueba la evaluación rigurosa';
+    a.style.opacity = permitido ? '' : '0.5';
+  });
+};
 
 /* Helper: fetch JSON con manejo de errores */
 async function apiFetch(url, options = {}) {

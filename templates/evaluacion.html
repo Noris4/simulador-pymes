@@ -16,6 +16,7 @@
     <li><a href="/evaluacion-page" class="active">③ Evaluación</a></li>
     <li><a href="/tramitologia-page">④ Tramitología</a></li>
     <li><a href="/registro-page">⑤ Conclusión</a></li>
+    <li><a href="/directorio-page">⑥ Empresas</a></li>
   </ul>
 </nav>
 
@@ -24,11 +25,11 @@
   <!-- Barra de progreso del flujo -->
   <div style="margin-bottom:1.5rem;">
     <div style="display:flex;justify-content:space-between;font-size:.8rem;color:#6b7280;margin-bottom:.35rem;">
-      <span>Paso 3 de 5</span>
-      <span>60 %</span>
+      <span>Paso 3 de 6</span>
+      <span>50 %</span>
     </div>
     <div class="progress-bar-wrap" style="margin:0;">
-      <div class="progress-bar-fill" style="width:60%"></div>
+      <div class="progress-bar-fill" style="width:50%"></div>
     </div>
   </div>
 
@@ -37,8 +38,8 @@
     <div class="step-header">
       <div class="step-num-big">3</div>
       <div>
-        <div class="step-title">Evaluación de viabilidad</div>
-        <div class="step-subtitle">Lazuli-KPI analiza tus 7 parámetros y te da una calificación. Necesitas <strong>80 puntos o más</strong> para continuar.</div>
+        <div class="step-title">Evaluación orientativa del plan</div>
+        <div class="step-subtitle">Evaluación rigurosa con IBM. Necesitas <strong>80/100 globales, al menos 80% en cada plan y ningún criterio por debajo de 3/5</strong>. Se revisan evidencia, cálculos y coherencia entre planes. Los pasos 4 y 5 permanecen bloqueados hasta aprobar. Solo puntúa el contenido: ventas 40 puntos, finanzas 40 y mercado 20. Capital, giro, empleados y registro legal se usan como contexto, sin puntos propios. Los planes se envían a IBM. Aprobar no garantiza la viabilidad empresarial.</div>
       </div>
     </div>
     <div id="alert-inicio" class="alert"></div>
@@ -61,12 +62,13 @@
 
     <div id="veredicto" style="text-align:center;font-weight:700;font-size:1.1rem;margin-bottom:1.5rem;"></div>
 
-    <!-- Detalle por parámetro -->
-    <h2>Detalle por parámetro</h2>
+    <!-- Puntaje por plan evaluado -->
+    <h2>Puntaje por plan evaluado</h2>
     <table id="tabla-detalle" style="width:100%;border-collapse:collapse;font-size:.88rem;margin-bottom:1.5rem;">
       <thead>
         <tr style="background:#f0f7ff;border-bottom:1px solid #bfdbfe;">
           <th style="text-align:left;padding:.5rem .75rem;">Parámetro</th>
+          <th style="text-align:left;padding:.5rem .75rem;">Justificación</th>
           <th style="text-align:right;padding:.5rem .75rem;">Obtenido</th>
           <th style="text-align:right;padding:.5rem .75rem;">Máximo</th>
         </tr>
@@ -76,7 +78,9 @@
 
     <!-- Feedback (solo si reprueba) -->
     <div id="feedback-wrap" style="display:none;">
-      <h2 style="margin-bottom:.75rem;">💬 Recomendaciones</h2>
+      <h2 style="margin-bottom:.75rem;">💬 Diagnóstico y plan de mejora completo</h2>
+      <p>Revisa cada criterio: evidencia encontrada, motivo de la nota, acciones, entregable y comprobación. El objetivo es mejorar con datos reales; seguir la guía no garantiza aprobar una nueva evaluación.</p>
+      <div id="guia-mejora"></div>
       <div id="feedback-resumen" class="feedback-resumen"></div>
       <div id="feedback-tabla-wrap" style="display:none;margin-top:1.25rem;">
         <h3 class="feedback-tabla-titulo">Análisis comparativo</h3>
@@ -97,7 +101,8 @@
       </div>
     </div>
 
-    <!-- Botón continuar después de evaluar (siempre visible al terminar) -->
+    <div id="bloqueo-resultado" class="alert alert-error" role="alert" style="display:none;"></div>
+    <!-- Continuar solo después de aprobar la evaluación vigente. -->
     <div id="continuar-wrap" style="display:none;margin-top:1.25rem;">
       <a href="/tramitologia-page" class="btn btn-success">Continuar → Paso 4: Tramitología</a>
     </div>
@@ -108,6 +113,9 @@
 <script src="/static/app.js"></script>
 <script>
   const empresaId = getEmpresaId();
+  if (new URLSearchParams(window.location.search).has("bloqueo")) {
+    showAlert(document.getElementById("alert-inicio"), "Acceso bloqueado: debes aprobar la evaluación rigurosa antes de entrar a los pasos 4 y 5.");
+  }
 
   if (!empresaId) window.location.href = "/";
 
@@ -120,6 +128,8 @@
   async function evaluar() {
     const alertEl = document.getElementById("alert-inicio");
     hideAlert(alertEl);
+    document.getElementById("continuar-wrap").style.display = "none";
+    if (window.actualizarAccesoPasos) window.actualizarAccesoPasos(false);
 
     const btn = document.getElementById("btn-evaluar");
     btn.disabled = true;
@@ -129,7 +139,8 @@
       const resultado = await apiFetch(`/empresa/${empresaId}/evaluar`, { method: "POST" });
       mostrarResultado(resultado);
     } catch (e) {
-      showAlert(alertEl, e.message);
+      sessionStorage.removeItem("ultima_evaluacion");
+      showAlert(alertEl, "Evaluación pendiente. " + e.message);
     } finally {
       btn.disabled = false;
       btn.textContent = "Evaluar mi empresa →";
@@ -145,111 +156,107 @@
     const veredicto   = document.getElementById("veredicto");
 
     scoreNum.textContent = r.calificacion.toFixed(1);
+    scoreCircle.classList.remove("pass", "fail");
     scoreCircle.classList.add(r.aprobado ? "pass" : "fail");
     veredicto.textContent = r.aprobado
-      ? "✅ ¡Aprobado! Tu empresa es viable."
-      : "❌ No aprobado. Revisa las recomendaciones.";
+      ? "✅ Tu plan alcanza el mínimo de esta evaluación orientativa."
+      : "❌ No aprobado. Los pasos 4 y 5 siguen bloqueados. Revisa los motivos y mejora tus planes.";
     veredicto.style.color = r.aprobado ? "#15803d" : "#b91c1c";
 
     // Guardar resultado en sessionStorage para que parametros.html pueda destacar los campos
     sessionStorage.setItem("ultima_evaluacion", JSON.stringify(r.detalle_puntajes));
 
     const tbody = document.getElementById("detalle-body");
+    const escapeHtml = (valor) => {
+      const span = document.createElement("span");
+      span.textContent = String(valor ?? "");
+      return span.innerHTML;
+    };
     tbody.innerHTML = Object.entries(r.detalle_puntajes).map(([nombre, d]) => {
       const pct = d.puntaje_obtenido / d.puntaje_maximo;
       const color = pct >= 0.8 ? "#15803d" : pct >= 0.5 ? "#b45309" : "#b91c1c";
       return `<tr style="border-bottom:1px solid #f0f7ff;">
-        <td style="padding:.5rem .75rem;">${nombre.replace(/_/g,' ')}</td>
+        <td style="padding:.5rem .75rem;">${escapeHtml(nombre.replace(/_/g,' '))}</td>
+        <td style="padding:.5rem .75rem;">${escapeHtml(d.motivo)}${d.criterios ? '<br><small>' + Object.entries(d.criterios).map(([k, v]) => escapeHtml(k) + ': ' + escapeHtml(v) + '/5').join(' · ') + '</small>' : ''}</td>
         <td style="text-align:right;padding:.5rem .75rem;color:${color};font-weight:600;">${d.puntaje_obtenido}</td>
         <td style="text-align:right;padding:.5rem .75rem;color:#6b7280;">${d.puntaje_maximo}</td>
       </tr>`;
     }).join('');
 
-    if (r.feedback) {
-      renderFeedback(r.feedback);
+    document.getElementById("feedback-wrap").style.display = "none";
+    if (r.guia_mejora) {
+      renderGuiaMejora(r);
       document.getElementById("feedback-wrap").style.display = "block";
     }
-    // Botón continuar siempre visible al terminar (apruebe o no)
-    document.getElementById("continuar-wrap").style.display = "block";
+    document.getElementById("continuar-wrap").style.display = r.aprobado ? "block" : "none";
+    const bloqueo = document.getElementById("bloqueo-resultado");
+    bloqueo.textContent = (r.motivos_bloqueo || []).join(" ");
+    bloqueo.style.display = r.aprobado ? "none" : "block";
+    if (window.actualizarAccesoPasos) window.actualizarAccesoPasos(r.aprobado);
   }
 
-  function renderFeedback(texto) {
-    // Busca los marcadores con variantes (el LLM puede devolver mayúsculas/minúsculas o con asteriscos)
-    const buscar = (marca) => {
-      const re = new RegExp(marca, "i");
-      const m  = re.exec(texto);
-      return m ? m.index : -1;
+  function renderGuiaMejora(resultado) {
+    const contenedor = document.getElementById("guia-mejora");
+    contenedor.replaceChildren();
+    document.getElementById("feedback-resumen").textContent = "";
+    document.getElementById("feedback-tabla-wrap").style.display = "none";
+    const nombres = {plan_ventas: "Plan de ventas", plan_financiero: "Plan financiero", analisis_mercado: "Análisis de mercado"};
+    const agregar = (padre, etiqueta, texto) => {
+      const p = document.createElement("p");
+      p.style.whiteSpace = "pre-wrap";
+      const titulo = document.createElement("strong");
+      titulo.textContent = etiqueta + ": ";
+      p.append(titulo, document.createTextNode(String(texto ?? "")));
+      padre.appendChild(p);
     };
-
-    const posResumen = buscar("\\*{0,2}RESUMEN\\*{0,2}");
-    const posTabla   = buscar("\\*{0,2}TABLA\\*{0,2}");
-
-    // --- Párrafos de resumen ---
-    const resumenEl = document.getElementById("feedback-resumen");
-    resumenEl.innerHTML = "";
-    let textoResumen = texto;
-
-    if (posResumen !== -1) {
-      const fin = posTabla !== -1 ? posTabla : texto.length;
-      // Saltamos el marcador mismo (hasta 20 chars para cubrir "**RESUMEN**\n")
-      const inicio = texto.indexOf("\n", posResumen) + 1 || posResumen + 7;
-      textoResumen = texto.slice(inicio, fin);
-    } else if (posTabla !== -1) {
-      textoResumen = texto.slice(0, posTabla);
-    }
-
-    textoResumen.trim().split(/\n{1,}/).forEach(linea => {
-      const p = linea.replace(/^\*+|\*+$/g, "").trim();  // quita asteriscos de negrita del LLM
-      if (p) {
-        const el = document.createElement("p");
-        el.textContent = p;
-        resumenEl.appendChild(el);
+    Object.entries(resultado.guia_mejora).forEach(([plan, guia]) => {
+      const seccion = document.createElement("section");
+      seccion.style.cssText = "margin:1.5rem 0;padding:1rem;border:1px solid #bfdbfe;border-radius:10px;overflow-wrap:anywhere;";
+      const titulo = document.createElement("h3");
+      titulo.textContent = `${nombres[plan] || plan}: ${guia.puntaje}/${guia.maximo}`;
+      seccion.appendChild(titulo);
+      agregar(seccion, "Meta mínima del plan", `${guia.maximo * 0.8}/${guia.maximo}; ningún criterio por debajo de 3/5. Apunta a 4/5 en todos para construir un plan sólido.`);
+      if (guia.fuente === "validacion_local") {
+        agregar(seccion, "Origen de esta guía", "Rúbrica del programa: se detectó texto no evaluable. Estas instrucciones explican cómo empezar; no se consultó a IBM para calificar este texto.");
       }
+      const criterios = Object.entries(guia.criterios).sort((a, b) => a[1] - b[1]);
+      criterios.forEach(([criterio, puntos]) => {
+        const detalle = document.createElement("details");
+        detalle.open = puntos < 4;
+        detalle.style.cssText = "margin-top:1rem;padding:.85rem;background:#f8fafc;border:1px solid #dbeafe;border-radius:8px;";
+        const encabezado = document.createElement("summary");
+        encabezado.style.cssText = "cursor:pointer;font-weight:700;";
+        const requisito = guia.requisitos[criterio];
+        encabezado.textContent = `${requisito.titulo}: ${puntos}/5 — ${puntos < 3 ? "Prioridad alta: bloquea la aprobación" : puntos < 4 ? "Requiere mejora" : "Fortaleza a mantener"}`;
+        detalle.appendChild(encabezado);
+        const datos = guia.desglose[criterio];
+        agregar(detalle, "Qué exige la rúbrica", requisito.requisito);
+        agregar(detalle, "Qué encontró la evaluación", datos.evidencia);
+        agregar(detalle, "Por qué obtuvo esa nota y qué falta", datos.brecha);
+        const subtitulo = document.createElement("h4");
+        subtitulo.textContent = "Acciones concretas para corregirlo";
+        detalle.appendChild(subtitulo);
+        const lista = document.createElement("ol");
+        lista.style.cssText = "padding-left:1.5rem;line-height:1.6;";
+        datos.acciones.forEach(accion => {
+          const item = document.createElement("li");
+          item.textContent = accion;
+          item.style.marginBottom = ".6rem";
+          lista.appendChild(item);
+        });
+        detalle.appendChild(lista);
+        agregar(detalle, "Qué debes incorporar al plan", datos.entregable);
+        agregar(detalle, "Cómo verificar la corrección", datos.verificacion);
+        agregar(detalle, "Ejemplo orientativo para completar", datos.ejemplo);
+        seccion.appendChild(detalle);
+      });
+      contenedor.appendChild(seccion);
     });
-
-    // --- Cuadro comparativo ---
-    // Buscar cualquier línea con "|" después del marcador TABLA (o en todo el texto si no hay marcador)
-    const inicioTabla = posTabla !== -1
-      ? (texto.indexOf("\n", posTabla) + 1 || posTabla + 5)
-      : 0;
-    const textoTabla = texto.slice(inicioTabla);
-    const filas = textoTabla.split("\n")
-      .map(l => l.replace(/^\*+|\*+$/g, "").trim())  // quita asteriscos
-      .filter(l => l.includes("|") && !l.match(/^[-|]+$/));  // excluye líneas separadoras tipo |---|
-
-    if (filas.length === 0) {
-      // Fallback: si el LLM no puso "|", mostrar todo el texto restante como lista simple
-      const colDebil  = document.getElementById("feedback-col-debil");
-      const colMejora = document.getElementById("feedback-col-mejora");
-      colDebil.innerHTML  = "";
-      colMejora.innerHTML = "";
-      document.getElementById("feedback-tabla-wrap").style.display = "block";
-      return;
-    }
-
-    const colDebil  = document.getElementById("feedback-col-debil");
-    const colMejora = document.getElementById("feedback-col-mejora");
-    colDebil.innerHTML  = "";
-    colMejora.innerHTML = "";
-
-    filas.forEach(fila => {
-      const partes = fila.split("|").map(s => s.replace(/^\*+|\*+$/g, "").trim());
-      const izq = partes[0] || "";
-      const der = partes[1] || "";
-
-      const elIzq = document.createElement("div");
-      elIzq.className = "feedback-fila";
-      elIzq.textContent = izq;
-      colDebil.appendChild(elIzq);
-
-      const elDer = document.createElement("div");
-      elDer.className = "feedback-fila";
-      elDer.textContent = der;
-      colMejora.appendChild(elDer);
-    });
-
-    document.getElementById("feedback-tabla-wrap").style.display = "block";
+    const aviso = document.createElement("p");
+    aviso.textContent = "La nota depende únicamente de los tres planes: ventas 40 puntos, finanzas 40 y mercado 20. El capital, giro, empleados y registro legal aportan contexto para revisar coherencia; no suman puntos por sí mismos.";
+    contenedor.appendChild(aviso);
   }
+
 </script>
 </body>
 </html>
