@@ -23,6 +23,8 @@ REQUISITOS = {
 
 def guia_local(nombre, criterios):
     return {clave: {
+        "estado": "ausente",
+        "citas": [],
         "evidencia": "El texto aportado no contiene evidencia evaluable para este criterio.",
         "brecha": "No se demuestra el requisito: " + requisito,
         "acciones": [accion, "Incorpora los resultados al plan y comprueba que coincidan con los otros dos planes. No inventes cifras o fuentes."],

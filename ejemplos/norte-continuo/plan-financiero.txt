@@ -1,0 +1,31 @@
+Capital inicial $260,000, sin deuda. Inversión única de $60,000: dos computadoras $30,000, herramientas/equipo $15,000 y preparación, formación y documentación $15,000. Quedan $200,000 líquidos; se separan $30,000 para contingencias y obligaciones fiscales provisionales; caja operativa inicial $170,000. El origen son aportaciones de fundadores. No se cuenta el capital como ingreso por ventas.
+
+Presupuesto NC-COSTOS revisado por Laura el 16/11/2026: computadoras, 2 por $15,000; equipo diagnóstico, 1 lote de $15,000; preparación, 60 horas externas por $250 = $15,000. Fuentes internas: cotización EQ-1611 de Equipo Frontera para dos computadoras de $15,000; cotización HD-1611 de Herramientas Delta por lote de $15,000; propuesta FO-1611 de Formación Operativa por 60 horas de $250. Las tres tienen fecha 16/11/2026 y vigencia de 30 días; los documentos se conservan en el expediente, pero no se adjuntan a este formulario. Al vencer su vigencia se recotizarán antes de comprar. La incertidumbre se somete a una sensibilidad de 25% sobre variables y 10% sobre precio.
+
+Costos recurrentes fijos mensuales: remuneraciones y cargas presupuestadas de dos personas $44,000; espacio, conectividad y servicios $6,000; comercialización $4,000; software compartido $2,000; administración, contabilidad y seguros $2,000. Total $58,000. El presupuesto laboral NC-NOMINA separa para cada persona $16,000 de remuneración y $6,000 de provisiones para cargas y prestaciones, total $22,000 por persona; reserva presupuestada, no certificación de cumplimiento normativo. Se revisa con el responsable contable antes de firmar contrataciones y se actualiza la caja si cambia. Costos variables por cliente: licencias dedicadas $900, transporte $500, consumibles y servicios externos $600; total $2,000. El tiempo técnico ya está en remuneraciones fijas, no se agrega dos veces. La inversión inicial es un desembolso previo y no se repite cada mes. Se reserva caja para reponer equipos después del horizonte inicial, sin confundir depreciación con desembolso mensual.
+
+Margen de contribución unitario: $8,000 − $2,000 = $6,000. Punto de equilibrio: $58,000 / $6,000 = 9.67, por lo que se requieren 10 clientes mensuales. Hay una sola suscripción; no existe mezcla de productos a calcular. Los servicios extraordinarios no se incluyen en ingresos previstos. La capacidad comercial inicial es de 20 clientes, mayor que el equilibrio. El escenario base llega a 10 en el mes 2; el adverso en el mes 5. La demanda futura sigue siendo incierta y no se considera demostrada por el cálculo.
+
+Flujo de caja operativo base, cobro anticipado, pagos en el mismo mes, sin cuentas por cobrar, antes de impuestos y distribuciones:
+Mes | clientes | cobros | variables | fijos | flujo | saldo final
+1 | 8 | 64000 | 16000 | 58000 | -10000 | 160000
+2 | 10 | 80000 | 20000 | 58000 | 2000 | 162000
+3 | 12 | 96000 | 24000 | 58000 | 14000 | 176000
+4 | 14 | 112000 | 28000 | 58000 | 26000 | 202000
+5 | 16 | 128000 | 32000 | 58000 | 38000 | 240000
+6 | 18 | 144000 | 36000 | 58000 | 50000 | 290000
+Comprobación: ingresos acumulados $624,000; variables $156,000; fijos $348,000; flujo $120,000. Caja inicial $170,000 + $120,000 = $290,000. La reserva de $30,000 está aparte y no se suma en cada mes.
+
+Flujo adverso con los mismos costos y precio:
+Mes | clientes | cobros | variables | fijos | flujo | saldo final
+1 | 6 | 48000 | 12000 | 58000 | -22000 | 148000
+2 | 7 | 56000 | 14000 | 58000 | -16000 | 132000
+3 | 8 | 64000 | 16000 | 58000 | -10000 | 122000
+4 | 9 | 72000 | 18000 | 58000 | -4000 | 118000
+5 | 10 | 80000 | 20000 | 58000 | 2000 | 120000
+6 | 11 | 88000 | 22000 | 58000 | 8000 | 128000
+El déficit acumulado máximo de $52,000 se cubre con la caja operativa; no se requiere préstamo en este escenario. No se omiten déficits por considerar solo utilidades contables.
+
+Sensibilidad: variable +25% = $2,500; margen $5,500; equilibrio 11 clientes. Precio −10% = $7,200, combinado con variable $2,500: margen $4,700 y equilibrio 13 clientes. Con 8 clientes en ese escenario combinado el flujo es 8 × $4,700 − $58,000 = −$20,400 al mes. Daniel actualiza semanalmente caja y márgenes; un saldo proyectado inferior a $100,000 activa congelación de compras y revisión de cobros y gasto discrecional. No se presume ahorro en remuneraciones ni se contrata deuda sin recalcular pagos.
+
+Los precios y flujos son antes de impuestos. Se separará todo impuesto trasladado cobrado; no es ingreso operativo. La determinación fiscal definitiva depende del régimen y de comprobantes, todavía pendientes de revisión profesional. Por ello no se distribuye el excedente proyectado ni se afirma una rentabilidad neta después de impuestos. No se supone estacionalidad favorable: misma tarifa y presupuesto fijo en seis meses; el escenario adverso refleja captación más lenta. Se revisará con datos mensuales antes de extender la proyección.

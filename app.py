@@ -4,13 +4,20 @@ load_dotenv(Path(__file__).resolve().parent / ".env", encoding="utf-8-sig")
 
 import os
 import secrets
-from flask import Flask, jsonify, request, render_template, session, redirect, url_for
+from flask import Flask, jsonify, request, render_template, session, redirect, url_for, send_file
 from empresa import perfil, guia, parametros, evaluacion, registro, tramitologia
 from empresa import directorio
+from empresa import documentos, informes_pdf
 
 app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY") or secrets.token_hex(32)
 app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax")
+app.config['MAX_CONTENT_LENGTH'] = 12 * 1024 * 1024
+
+
+@app.errorhandler(413)
+def archivo_demasiado_grande(error):
+    return jsonify({'error': 'El archivo supera el límite de 10 MB permitido para importar.'}), 413
 
 
 @app.before_request
@@ -38,6 +45,11 @@ def proteger_pasos_avanzados():
 
 @app.route("/")
 def index():
+    return render_template("bienvenida.html")
+
+
+@app.route("/registrar-empresa")
+def registrar_empresa_page():
     return render_template("index.html")
 
 @app.route("/parametros-page")
@@ -153,6 +165,42 @@ def route_obtener_parametros(empresa_id):
     if resultado is None:
         return jsonify({"error": "Parámetros no encontrados"}), 404
     return jsonify(resultado)
+
+
+@app.route('/empresa/<empresa_id>/importar-documento', methods=['POST'])
+def route_importar_documento(empresa_id):
+    if session.get('empresa_id') != empresa_id or perfil.obtener_empresa(empresa_id) is None:
+        return jsonify({'error': 'Primero crea una empresa en esta sesión.'}), 403
+    archivo = request.files.get('archivo')
+    if archivo is None:
+        return jsonify({'error': 'Selecciona un archivo PDF o Word .docx.'}), 400
+    try:
+        campos = documentos.importar_archivo(archivo, request.form.get('campo', ''))
+    except documentos.ErrorDocumento as error:
+        return jsonify({'error': str(error)}), 400
+    return jsonify({'campos': campos, 'mensaje': 'Texto importado. Revísalo y pulsa Guardar para usarlo en la evaluación.'})
+
+
+@app.route('/empresa/<empresa_id>/evaluaciones/<evaluacion_id>/pdf', methods=['GET'])
+def route_descargar_evaluacion_pdf(empresa_id, evaluacion_id):
+    if session.get('empresa_id') != empresa_id:
+        return jsonify({'error': 'El informe pertenece a otra sesión.'}), 403
+    resultado = next((r for r in evaluacion.obtener_historial_evaluaciones(empresa_id)
+                      if r.get('evaluacion_id') == evaluacion_id and r.get('estado') == 'completada'), None)
+    if resultado is None:
+        return jsonify({'error': 'La evaluación ya no está disponible. Vuelve a evaluar para generar un informe nuevo.'}), 404
+    nombre = resultado.get('nombre_empresa') or (perfil.obtener_empresa(empresa_id) or {}).get('nombre', 'Empresa')
+    archivo = informes_pdf.crear_informe(resultado, nombre)
+    return send_file(archivo, mimetype='application/pdf', as_attachment=True,
+                     download_name=f'evaluacion-{evaluacion_id[:12]}.pdf', max_age=0)
+
+
+@app.route('/ejemplo-prueba.pdf', methods=['GET'])
+def descargar_ejemplo_pdf():
+    archivo = Path(app.root_path) / 'ejemplos' / 'norte-continuo' / 'Norte-Continuo-TI.pdf'
+    if not archivo.exists():
+        return jsonify({'error': 'El documento de prueba todavía no está disponible.'}), 404
+    return send_file(archivo, mimetype='application/pdf', as_attachment=True, download_name=archivo.name)
 
 
 # ── Evaluación ───────────────────────────────────────────────────────────────

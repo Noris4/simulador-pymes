@@ -9,9 +9,9 @@
 <body>
 
 <nav>
-  <span class="brand">💎 Lazuli-KPI</span>
+  <a class="brand" href="/" style="text-decoration:none;">💎 Lazuli-KPI</a>
   <ul class="steps-nav">
-    <li><a href="/">① Inicio</a></li>
+    <li><a href="/registrar-empresa">① Inicio</a></li>
     <li><a href="/parametros-page" class="active">② Parámetros</a></li>
     <li><a href="/evaluacion-page">③ Evaluación</a></li>
     <li><a href="/tramitologia-page">④ Tramitología</a></li>
@@ -38,7 +38,7 @@
       <div class="step-num-big">2</div>
       <div>
         <div class="step-title">Parámetros de tu empresa</div>
-        <div class="step-subtitle">Completa los 7 factores. Bob los usará para evaluar la viabilidad de tu negocio.</div>
+        <div class="step-subtitle">Completa los datos y los tres planes. Puedes escribirlos o importar un PDF o Word .docx en cada apartado. Revisa el texto antes de guardarlo. Hasta 10 MB por archivo; los PDF escaneados requieren OCR previo.</div>
       </div>
     </div>
 
@@ -75,18 +75,24 @@
     <div class="form-group" id="fg-plan-ventas">
       <label for="plan-ventas">Plan de ventas</label>
       <textarea id="plan-ventas" placeholder="Describe tu estrategia de ventas: ¿a quién le vendes, cómo y cuánto esperas vender?"></textarea>
+      <input type="file" id="archivo-ventas" accept=".pdf,.docx" aria-label="Archivo del plan de ventas" />
+      <button type="button" class="btn btn-outline importar-documento" data-campo="plan_ventas" data-archivo="archivo-ventas">Importar archivo de ventas</button>
       <small>IBM evalúa clientes, canales, acciones y metas. La longitud no da puntos.</small>
     </div>
 
     <div class="form-group" id="fg-plan-financiero">
       <label for="plan-financiero">Plan financiero</label>
       <textarea id="plan-financiero" placeholder="Describe tus proyecciones de ingresos, gastos y punto de equilibrio."></textarea>
+      <input type="file" id="archivo-finanzas" accept=".pdf,.docx" aria-label="Archivo del plan financiero" />
+      <button type="button" class="btn btn-outline importar-documento" data-campo="plan_financiero" data-archivo="archivo-finanzas">Importar archivo financiero</button>
       <small>Aporta datos y supuestos propios. IBM evalúa el contenido, no la longitud.</small>
     </div>
 
     <div class="form-group" id="fg-analisis">
       <label for="analisis">Análisis de mercado</label>
       <textarea id="analisis" placeholder="¿Quiénes son tus competidores? ¿Cuál es tu mercado objetivo en Baja California?"></textarea>
+      <input type="file" id="archivo-mercado" accept=".pdf,.docx" aria-label="Archivo del análisis de mercado" />
+      <button type="button" class="btn btn-outline importar-documento" data-campo="analisis_mercado" data-archivo="archivo-mercado">Importar archivo de mercado</button>
       <small>Aporta datos y supuestos propios. IBM evalúa el contenido, no la longitud.</small>
     </div>
 
@@ -109,7 +115,7 @@
   /* Redirigir si no hay empresa creada */
   if (!empresaId) {
     showAlert(document.createElement("div"), "");
-    window.location.href = "/";
+    window.location.href = "/registrar-empresa";
   }
 
   /* Pre-cargar datos de la empresa para rellenar el sector */
@@ -164,6 +170,36 @@
   });
 
   precargar();
+
+  document.querySelectorAll('.importar-documento').forEach(boton => {
+    boton.addEventListener('click', async () => {
+      const alerta = document.getElementById('alert');
+      const archivo = document.getElementById(boton.dataset.archivo).files[0];
+      if (!archivo) { showAlert(alerta, 'Selecciona primero un archivo PDF o Word .docx.'); return; }
+      const originales = boton.textContent;
+      const controles = [...document.querySelectorAll('.importar-documento'), document.getElementById('btn-guardar')];
+      controles.forEach(control => control.disabled = true);
+      boton.textContent = 'Extrayendo texto…';
+      try {
+        const datos = new FormData();
+        datos.append('archivo', archivo);
+        datos.append('campo', boton.dataset.campo);
+        const respuesta = await fetch(`/empresa/${empresaId}/importar-documento`, {method: 'POST', body: datos});
+        const resultado = await respuesta.json();
+        if (!respuesta.ok) throw new Error(resultado.error || 'No se pudo importar el archivo.');
+        const mapa = {plan_ventas: 'plan-ventas', plan_financiero: 'plan-financiero', analisis_mercado: 'analisis'};
+        Object.entries(resultado.campos).forEach(([campo, texto]) => document.getElementById(mapa[campo]).value = texto);
+        sessionStorage.removeItem('ultima_evaluacion');
+        showAlert(alerta, resultado.mensaje, 'success');
+        alerta.scrollIntoView({behavior: 'smooth', block: 'center'});
+      } catch (error) {
+        showAlert(alerta, error.message);
+      } finally {
+        boton.textContent = originales;
+        controles.forEach(control => control.disabled = false);
+      }
+    });
+  });
 
   /* Resaltar campos según la última evaluación guardada */
   (function aplicarDestacados() {

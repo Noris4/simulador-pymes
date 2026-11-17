@@ -11,10 +11,15 @@ from empresa.rubrica import guia_local
 
 
 def respuesta(valor=2):
-    return {nombre: {"criterios": dict.fromkeys(sorted(criterios), valor),
+    datos = {nombre: {"criterios": dict.fromkeys(sorted(criterios), valor),
                      "motivo": "Faltan datos concretos.", "mejora": "Agrega metas y supuestos.",
                      "desglose": guia_local(nombre, criterios)}
             for nombre, criterios in CRITERIOS.items()}
+    for info in datos.values():
+        for guia in info['desglose'].values():
+            guia['estado'] = 'completo_no_verificado'
+            guia['citas'] = [{'campo': 'plan_ventas', 'fragmento': 'clientes locales con'}]
+    return datos
 
 
 class Integracion(unittest.TestCase):
@@ -57,7 +62,11 @@ class Integracion(unittest.TestCase):
     def test_basura_parcial_no_recibe_puntos_incluso_si_ibm_los_da(self):
         self.datos['plan_ventas'] = 's' * 500
         self.guardar()
-        with patch('empresa.revision_planes.llamar_chat', return_value=json.dumps(respuesta(5))):
+        datos = respuesta(5)
+        for info in datos.values():
+            for guia in info['desglose'].values():
+                guia['citas'][0]['campo'] = 'plan_financiero'
+        with patch('empresa.revision_planes.llamar_chat', return_value=json.dumps(datos)):
             r = self.evaluar().get_json()
         self.assertEqual(r['calificacion'], 60)
         self.assertFalse(r['aprobado'])
@@ -224,6 +233,69 @@ class Integracion(unittest.TestCase):
             r = self.evaluar().get_json()
         self.assertEqual(r['calificacion'], 100)
         self.assertEqual(sum(d['puntaje_maximo'] for d in r['detalle_puntajes'].values()), 100)
+
+    def test_citas_inventadas_no_son_aceptadas(self):
+        datos = respuesta(4)
+        datos['plan_ventas']['desglose']['clientes']['citas'][0]['fragmento'] = 'Se realizaron mil entrevistas a clientes y todas fueron favorables.'
+        with self.assertRaises(ErrorWatsonx):
+            validar_respuesta(json.dumps(datos), self.datos)
+
+    def test_referencia_cruzada_reconoce_escenario_en_otro_plan(self):
+        datos = respuesta(4)
+        fragmento = 'Escenario adverso: seis clientes, flujo negativo de 22000 y saldo final de 148000.'
+        self.datos['plan_financiero'] += ' ' + fragmento
+        datos['plan_ventas']['desglose']['metas']['citas'] = [{'campo': 'plan_financiero', 'fragmento': fragmento}]
+        validar_respuesta(json.dumps(datos), self.datos)
+
+    def test_ausencia_y_contradiccion_no_pueden_recibir_notas_altas(self):
+        for estado in ('ausente', 'contradictorio', 'incompleto'):
+            datos = respuesta(4)
+            datos['plan_ventas']['desglose']['clientes']['estado'] = estado
+            with self.subTest(estado=estado), self.assertRaises(ErrorWatsonx):
+                validar_respuesta(json.dumps(datos), self.datos)
+
+    def test_textos_de_plantilla_no_justifican_una_evaluacion(self):
+        datos = respuesta(4)
+        datos['plan_financiero']['motivo'] = 'Evidencia y faltantes'
+        with self.assertRaises(ErrorWatsonx):
+            validar_respuesta(json.dumps(datos), self.datos)
+
+    def test_cliente_solicita_formato_estructurado_para_la_evaluacion(self):
+        from empresa.revision_planes import esquema_respuesta
+        config = dict(WATSONX_API_KEY='clave-ficticia', WATSONX_PROJECT_ID='proyecto-prueba',
+                      WATSONX_BASE_URL='https://us-south.ml.cloud.ibm.com', WATSONX_MODEL='ibm/granite-4-h-small')
+        with patch.dict(os.environ, config, clear=True), patch('empresa.watsonx._peticion', side_effect=[
+            {'access_token': 'token-ficticio'}, {'choices': [{'finish_reason': 'stop', 'message': {'content': '{}'}}]}
+        ]) as consulta:
+            llamar_chat('Solo JSON', '{}', schema=esquema_respuesta())
+            formato = json.loads(consulta.call_args.args[1])['response_format']
+            self.assertEqual(formato['type'], 'json_schema')
+            esquema = formato['json_schema']['schema']
+            acciones = esquema['properties']['plan_ventas']['properties']['desglose']['properties']['clientes']['properties']['acciones']
+            self.assertEqual(acciones['items']['type'], 'string')
+
+    def test_referencias_se_materializan_desde_el_original(self):
+        from empresa.revision_planes import fragmentar_planes, materializar_revision
+        referencias = fragmentar_planes(self.datos)
+        identidad = next(iter(referencias))
+        datos = respuesta(4)
+        for guia in datos['plan_ventas']['desglose'].values():
+            guia.pop('citas')
+            guia['referencias'] = [identidad]
+            guia['puntaje'] = 4
+        info = materializar_revision(datos, 'plan_ventas', referencias)
+        for guia in info['desglose'].values():
+            self.assertEqual(guia['citas'], [referencias[identidad]])
+            self.assertIn(guia['citas'][0]['fragmento'], self.datos[guia['citas'][0]['campo']])
+
+    def test_no_se_puede_citar_un_identificador_inexistente(self):
+        from empresa.revision_planes import fragmentar_planes, materializar_revision
+        datos = respuesta(4)
+        guia = datos['plan_ventas']['desglose']['clientes']
+        guia['referencias'] = ['fuente-inventada']
+        guia['puntaje'] = 4
+        with self.assertRaises(ValueError):
+            materializar_revision(datos, 'plan_ventas', fragmentar_planes(self.datos))
 
 
 if __name__ == '__main__':

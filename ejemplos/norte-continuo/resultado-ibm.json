@@ -1,0 +1,38 @@
+{
+  "origen": "Respuestas reales de IBM para este caso ficticio; validación local del formato y de las referencias.",
+  "calificacion": 80.0,
+  "aprobado": true,
+  "motivos": [],
+  "detalle": {
+    "plan_ventas": {
+      "criterios": {
+        "acciones": 4,
+        "canales": 4,
+        "clientes": 4,
+        "metas": 4
+      },
+      "puntaje_obtenido": 32.0,
+      "puntaje_maximo": 40.0
+    },
+    "plan_financiero": {
+      "criterios": {
+        "costos": 4,
+        "equilibrio": 4,
+        "flujo": 4,
+        "ingresos": 4
+      },
+      "puntaje_obtenido": 32.0,
+      "puntaje_maximo": 40.0
+    },
+    "analisis_mercado": {
+      "criterios": {
+        "competencia": 4,
+        "demanda": 4,
+        "diferenciacion": 4,
+        "segmento": 4
+      },
+      "puntaje_obtenido": 16.0,
+      "puntaje_maximo": 20.0
+    }
+  }
+}

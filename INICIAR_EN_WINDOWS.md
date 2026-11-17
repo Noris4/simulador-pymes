@@ -67,6 +67,26 @@ Los textos sin contenido reciben una guía inicial basada en la rúbrica local, 
 Las consultas ahora permiten respuestas más extensas; pueden tardar y consumir más tokens.
 Una respuesta de IBM truncada o sin el desglose requerido no se acepta como evaluación completa.
 
+Cada criterio ahora incluye estado del contenido y citas comprobadas contra los planes originales.
+Se distingue contenido ausente, incompleto, contradictorio y completo sin autenticidad externa
+verificada. Las referencias a información de otro plan cuentan: no hace falta duplicar un cálculo
+o escenario en todos los campos. Se rechazan citas inexistentes, notas incompatibles con el estado
+y explicaciones que repitan etiquetas de la plantilla. Esto no sustituye una auditoría humana.
+La consulta de evaluación solicita a IBM una salida estructurada con un esquema JSON para
+mantener consistentes los tipos de datos de los criterios, las citas y las acciones.
+La variable WATSONX_EVALUATION_MODEL permite elegir el modelo de evaluación por separado del
+modelo de trámites. La configuración de referencia usa mistralai/mistral-medium-2505 para
+evaluación y conserva Granite para las otras consultas. Requiere acceso al modelo en tu región
+y consume la cuota correspondiente a ese modelo; no se crean recursos de pago automáticamente.
+Cada plan se analiza en una consulta separada, con los otros dos como contexto. Esto evita
+mezclar criterios en una respuesta demasiado larga; puede aumentar el tiempo y el consumo de entrada.
+Las citas se insertan desde fragmentos originales identificados por el programa: IBM selecciona
+identificadores, sin reescribir el texto fuente. Esto evita citas inventadas o atribuidas al campo equivocado.
+Las evaluaciones de versiones anteriores deben repetirse con esta rúbrica.
+
+El archivo EJEMPLO_NORTE_CONTINUO.md contiene los campos de un caso simulado completo para
+pruebas. Sus registros y proveedores son de demostración, no hechos reales. No hay aprobación garantizada.
+
 ## Comprobar sin consumir IBM
 
 ```powershell
@@ -76,6 +96,26 @@ Una respuesta de IBM truncada o sin el desglose requerido no se acepta como eval
 Las pruebas simulan respuestas de IBM y comprueban puntajes, errores, validación y páginas.
 
 ## Paso 6: directorio de empresas
+
+## Importar PDF y Word, y descargar resultados
+
+En Parámetros puedes importar un PDF con texto o un Word .docx en cada apartado mediante
+los tres importadores individuales. Si seleccionas un documento con los tres planes y sus
+encabezados en líneas independientes, se extrae solo el apartado correspondiente al botón.
+Se admite hasta 10 MB y 80 páginas por PDF. Los escaneos necesitan OCR previo y los archivos
+.doc deben guardarse como .docx. Cada plan conserva el límite de 12000 caracteres. Revisa
+el texto extraído y pulsa Guardar. La importación es local; IBM recibe el texto al evaluar.
+
+Después de una evaluación completada, aprobada o no, aparece “Descargar evaluación completa
+en PDF”. El informe incluye resultado, motivos de bloqueo, los 12 criterios, citas, acciones,
+entregables, comprobaciones, ejemplos y un anexo con los textos evaluados. Descargarlo no
+genera otra consulta de IBM. Requiere la misma sesión y que el resultado siga en memoria.
+
+El expediente de prueba completo puede descargarse desde /ejemplo-prueba.pdf e importarse
+en una sola operación. Incluye datos iniciales y los tres planes, con validación de demanda
+complementaria realizada dentro del caso ficticio. No acredita hechos de una empresa real.
+
+## Explorar el directorio
 
 “⑥ Empresas” es de acceso libre, sin crear empresa ni aprobar. Solo editar la tarjeta requiere aprobación. El directorio muestra
 las aprobaciones vigentes y 12 ejemplos ficticios identificados con calificaciones simuladas.
@@ -96,3 +136,8 @@ en memoria; al reiniciar se pierden. Los ejemplos permanecen porque forman parte
 
 La clave fija de la versión anterior fue retirada del código. Si era tuya, revócala desde IBM:
 eliminarla del archivo no la borra del historial de GitHub.
+
+
+## Pantalla de bienvenida
+
+La dirección / abre la bienvenida. Registrar empresa lleva al formulario original en /registrar-empresa; Explorar empresas abre /directorio-page sin registro. El logotipo permite volver a la bienvenida.

@@ -9,9 +9,9 @@
 <body>
 
 <nav>
-  <span class="brand">💎 Lazuli-KPI</span>
+  <a class="brand" href="/" style="text-decoration:none;">💎 Lazuli-KPI</a>
   <ul class="steps-nav">
-    <li><a href="/">① Inicio</a></li>
+    <li><a href="/registrar-empresa">① Inicio</a></li>
     <li><a href="/parametros-page">② Parámetros</a></li>
     <li><a href="/evaluacion-page" class="active">③ Evaluación</a></li>
     <li><a href="/tramitologia-page">④ Tramitología</a></li>
@@ -61,6 +61,7 @@
     </div>
 
     <div id="veredicto" style="text-align:center;font-weight:700;font-size:1.1rem;margin-bottom:1.5rem;"></div>
+    <div style="text-align:center;margin-bottom:1.5rem;"><a id="descargar-evaluacion" class="btn btn-outline" style="display:none;">Descargar evaluación completa en PDF</a></div>
 
     <!-- Puntaje por plan evaluado -->
     <h2>Puntaje por plan evaluado</h2>
@@ -117,7 +118,7 @@
     showAlert(document.getElementById("alert-inicio"), "Acceso bloqueado: debes aprobar la evaluación rigurosa antes de entrar a los pasos 4 y 5.");
   }
 
-  if (!empresaId) window.location.href = "/";
+  if (!empresaId) window.location.href = "/registrar-empresa";
 
   document.getElementById("btn-evaluar").addEventListener("click", evaluar);
   document.getElementById("btn-reevaluar")?.addEventListener("click", () => {
@@ -129,11 +130,12 @@
     const alertEl = document.getElementById("alert-inicio");
     hideAlert(alertEl);
     document.getElementById("continuar-wrap").style.display = "none";
+    document.getElementById("descargar-evaluacion").style.display = "none";
     if (window.actualizarAccesoPasos) window.actualizarAccesoPasos(false);
 
     const btn = document.getElementById("btn-evaluar");
     btn.disabled = true;
-    btn.textContent = "Evaluando…";
+    btn.textContent = "Revisando los tres planes y sus citas…";
 
     try {
       const resultado = await apiFetch(`/empresa/${empresaId}/evaluar`, { method: "POST" });
@@ -156,6 +158,9 @@
     const veredicto   = document.getElementById("veredicto");
 
     scoreNum.textContent = r.calificacion.toFixed(1);
+    const enlacePdf = document.getElementById('descargar-evaluacion');
+    enlacePdf.href = `/empresa/${encodeURIComponent(empresaId)}/evaluaciones/${encodeURIComponent(r.evaluacion_id)}/pdf`;
+    enlacePdf.style.display = r.evaluacion_id ? 'inline-flex' : 'none';
     scoreCircle.classList.remove("pass", "fail");
     scoreCircle.classList.add(r.aprobado ? "pass" : "fail");
     veredicto.textContent = r.aprobado
@@ -231,6 +236,11 @@
         detalle.appendChild(encabezado);
         const datos = guia.desglose[criterio];
         agregar(detalle, "Qué exige la rúbrica", requisito.requisito);
+        const estados = {ausente: "Información ausente", incompleto: "Información incompleta", completo_no_verificado: "Contenido completo; autenticidad no verificada", contradictorio: "Contradicción identificada"};
+        agregar(detalle, "Estado del contenido", estados[datos.estado] || datos.estado);
+        (datos.citas || []).forEach(cita => {
+          agregar(detalle, "Fragmento revisado · " + (nombres[cita.campo] || cita.campo), '“' + cita.fragmento + '”');
+        });
         agregar(detalle, "Qué encontró la evaluación", datos.evidencia);
         agregar(detalle, "Por qué obtuvo esa nota y qué falta", datos.brecha);
         const subtitulo = document.createElement("h4");

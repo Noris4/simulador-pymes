@@ -27,11 +27,11 @@ def _peticion(url, payload, headers):
         raise ErrorWatsonx("No se pudo obtener una respuesta de IBM. Revisa tu conexión e inténtalo de nuevo.") from None
 
 
-def llamar_chat(instrucciones, datos, max_tokens=2000):
+def llamar_chat(instrucciones, datos, max_tokens=2000, schema=None, model=None):
     clave = os.getenv("WATSONX_API_KEY", "").strip()
     proyecto = os.getenv("WATSONX_PROJECT_ID", "").strip()
     base = os.getenv("WATSONX_BASE_URL", "").strip().rstrip("/")
-    modelo = os.getenv("WATSONX_MODEL", "").strip()
+    modelo = model or os.getenv("WATSONX_MODEL", "").strip()
     if not all((clave, proyecto, base, modelo)) or clave == "PEGA_AQUI_TU_CLAVE":
         raise ErrorWatsonx("Falta configurar IBM en el archivo .env. La evaluación queda pendiente.")
     destino = urllib.parse.urlsplit(base)
@@ -47,13 +47,18 @@ def llamar_chat(instrucciones, datos, max_tokens=2000):
     )
     if not isinstance(token, dict) or not isinstance(token.get("access_token"), str):
         raise ErrorWatsonx("IBM devolvió una autenticación incompleta.")
+    cuerpo = {
+        "project_id": proyecto, "model_id": modelo,
+        "messages": [{"role": "system", "content": instrucciones}, {"role": "user", "content": datos}],
+        "temperature": 0, "max_tokens": max_tokens,
+    }
+    if schema is not None:
+        cuerpo["response_format"] = {"type": "json_schema", "json_schema": {
+            "name": "evaluacion_planes", "strict": True, "schema": schema,
+        }}
     respuesta = _peticion(
         base + "/ml/v1/text/chat?version=2023-05-29",
-        json.dumps({
-            "project_id": proyecto, "model_id": modelo,
-            "messages": [{"role": "system", "content": instrucciones}, {"role": "user", "content": datos}],
-            "temperature": 0, "max_tokens": max_tokens,
-        }, ensure_ascii=False).encode("utf-8"),
+        json.dumps(cuerpo, ensure_ascii=False).encode("utf-8"),
         {"Content-Type": "application/json", "Accept": "application/json", "Authorization": "Bearer " + token["access_token"]},
     )
     try:

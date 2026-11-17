@@ -5,6 +5,8 @@ from empresa.watsonx import ErrorWatsonx
 from datetime import datetime
 import hashlib
 import json
+import uuid
+from empresa import perfil as mod_perfil
 from empresa import parametros as mod_parametros
 
 # ── Configuración de la evaluación ──────────────────────────────────────────
@@ -17,7 +19,7 @@ PESOS: dict[str, float] = {
 }
 
 CALIFICACION_MINIMA: float = 80.0
-VERSION_EVALUACION = "contenido-v2"
+VERSION_EVALUACION = "contenido-v3-citas"
 
 
 def huella_parametros(params):
@@ -113,6 +115,8 @@ def evaluar_empresa(empresa_id: str) -> dict:
     feedback = "RESUMEN\nEvaluación orientativa del contenido. No acredita la viabilidad ni verifica los datos declarados.\n\nTABLA\n" + "\n".join(filas)
 
     resultado = {
+        "evaluacion_id": uuid.uuid4().hex,
+        "nombre_empresa": (mod_perfil.obtener_empresa(empresa_id) or {}).get("nombre", "Empresa"),
         "estado": "completada",
         "version_evaluacion": VERSION_EVALUACION,
         "huella_parametros": huella,
